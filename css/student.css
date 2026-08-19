@@ -1,1 +1,292 @@
-s
+.student-select,
+.pin-screen,
+.student-home {
+    width: min(100% - 32px, 900px);
+    margin: 0 auto;
+    padding: 32px 0 48px;
+}
+
+
+/* BRAND */
+
+.brand {
+    text-align: center;
+    padding-top: 30px;
+}
+
+.brand-mark {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: 1px;
+}
+
+.brand p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+
+/* WELCOME */
+
+.welcome {
+    margin: 48px 0 24px;
+    text-align: center;
+}
+
+.welcome h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.welcome p {
+    margin: 8px 0 0;
+    color: var(--muted);
+}
+
+
+/* STUDENT LIST */
+
+.student-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.student-card {
+    border: 0;
+    border-radius: 24px;
+    background: var(--surface);
+    padding: 28px 20px;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.student-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
+}
+
+.student-avatar {
+    width: 72px;
+    height: 72px;
+
+    display: grid;
+    place-items: center;
+
+    margin: 0 auto 14px;
+
+    border-radius: 50%;
+    background: #EFF6FF;
+
+    font-size: 38px;
+}
+
+.student-avatar.large {
+    width: 92px;
+    height: 92px;
+
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.student-card strong {
+    display: block;
+    font-size: 20px;
+}
+
+.student-card small {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
+}
+
+
+/* PIN */
+
+.pin-screen {
+    max-width: 460px;
+    text-align: center;
+}
+
+.back-button {
+    display: block;
+    margin-bottom: 40px;
+
+    border: 0;
+    background: transparent;
+
+    color: var(--blue);
+    font-weight: 700;
+}
+
+.pin-box {
+    margin-top: 28px;
+
+    background: var(--surface);
+    border-radius: 24px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.pin-box h3 {
+    margin-top: 0;
+}
+
+#student-pin {
+    width: 100%;
+
+    padding: 16px;
+
+    border: 2px solid var(--border);
+    border-radius: 14px;
+
+    text-align: center;
+    font-size: 28px;
+    letter-spacing: 8px;
+
+    margin-bottom: 16px;
+}
+
+#student-pin:focus {
+    outline: none;
+    border-color: var(--blue);
+}
+
+
+/* HOME */
+
+.home-header {
+    margin-bottom: 40px;
+}
+
+.student-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.student-identity .student-avatar {
+    margin: 0;
+}
+
+.greeting {
+    margin: 0;
+    color: var(--muted);
+}
+
+.home-header h2 {
+    margin: 2px 0;
+    font-size: 28px;
+}
+
+.home-header span {
+    color: var(--muted);
+}
+
+
+/* ACTIVITY */
+
+.activity-menu {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.activity-card {
+    min-height: 180px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+
+    text-align: left;
+
+    border: 0;
+    border-radius: 24px;
+
+    padding: 24px;
+
+    background: var(--surface);
+
+    box-shadow:
+        0 8px 30px rgba(15, 23, 42, 0.08);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.activity-card:hover {
+    transform: translateY(-3px);
+}
+
+.activity-icon {
+    font-size: 42px;
+    margin-bottom: 20px;
+}
+
+.activity-content strong {
+    display: block;
+    font-size: 21px;
+}
+
+.activity-content small {
+    display: block;
+    margin-top: 7px;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+
+/* ACTIVITY COLORS */
+
+.activity-card.quiz {
+    border-top: 6px solid var(--blue);
+}
+
+.activity-card.stem {
+    border-top: 6px solid var(--cyan);
+}
+
+.activity-card.timed {
+    border-top: 6px solid var(--orange);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+    .student-list,
+    .activity-menu {
+        grid-template-columns: 1fr;
+    }
+
+    .student-card {
+        padding: 22px;
+    }
+
+    .activity-card {
+        min-height: 140px;
+    }
+
+    .brand h1 {
+        font-size: 25px;
+    }
+
+    .welcome h2 {
+        font-size: 24px;
+    }
+}
