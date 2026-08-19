@@ -278,12 +278,8 @@ async function loginStudent() {
                 : data;
 
 
-        if (!result?.success) {
-
-            showLoginError(
-                result?.error_code
-            );
-
+        if (!result) {
+            showLoginError("INVALID_PIN");
             return;
         }
 
@@ -323,12 +319,18 @@ async function loginStudent() {
 
     } catch (err) {
 
-        console.error(err);
+        console.error("Login error:", err);
 
-        error.textContent =
-            "Terjadi masalah saat masuk.";
+        let errorCode = "INVALID_PIN";
+        const message = err.message || "";
 
-        error.classList.remove("hidden");
+        if (message.includes("PIN_TEMPORARILY_LOCKED")) {
+            errorCode = "PIN_TEMPORARILY_LOCKED";
+        } else if (message.includes("STUDENT_NOT_FOUND")) {
+            errorCode = "STUDENT_NOT_FOUND";
+        }
+
+        showLoginError(errorCode);
 
     } finally {
 
