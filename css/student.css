@@ -1,240 +1,173 @@
-/* --- VIEW: PILIH SISWA --- */
-.student-select-container {
-    max-width: 600px;
+.student-select,
+.pin-screen,
+.student-home {
+    width: min(100% - 32px, 900px);
     margin: 0 auto;
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    justify-content: center;
+    padding: 32px 0 48px;
 }
+
+
+/* BRAND */
 
 .brand {
     text-align: center;
-    margin-bottom: 24px;
+    padding-top: 30px;
 }
 
-.brand-badge {
-    width: 64px;
-    height: 64px;
-    background: white;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    margin: 0 auto 12px;
-    box-shadow: var(--shadow-soft);
-    border: 3px solid #E2E8F0;
+.brand-mark {
+    font-size: 42px;
+    margin-bottom: 8px;
 }
 
 .brand h1 {
-    font-size: 28px;
-    color: var(--blue);
     margin: 0;
+    font-size: 30px;
     letter-spacing: 1px;
 }
 
 .brand p {
-    margin: 2px 0 0;
-    font-size: 13px;
-    font-weight: 700;
+    margin: 4px 0 0;
     color: var(--muted);
-    letter-spacing: 2px;
+    font-weight: 600;
 }
 
+
+/* WELCOME */
+
 .welcome {
+    margin: 48px 0 24px;
     text-align: center;
-    margin-bottom: 32px;
 }
 
 .welcome h2 {
-    font-size: 26px;
-    color: var(--text);
-    margin: 0 0 6px;
+    margin: 0;
+    font-size: 28px;
 }
 
 .welcome p {
+    margin: 8px 0 0;
     color: var(--muted);
-    font-size: 16px;
-    margin: 0;
 }
 
-/* Kotak List Siswa (Render dinamis dari JS) */
+
+/* STUDENT LIST */
+
 .student-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px;
-    width: 100%;
-    max-width: 500px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
 }
 
-/* Kartu Pilihan Siswa (Tombol Siswa) */
 .student-card {
-    background: var(--surface);
-    border: 3px solid var(--border);
+    border: 0;
     border-radius: 24px;
-    padding: 24px 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: var(--shadow-card);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    background: var(--surface);
+    padding: 28px 20px;
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .student-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--blue);
-    box-shadow: 0 10px 0px 0px var(--blue);
-}
-
-.student-card:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0px 0px var(--blue);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(15, 23, 42, 0.12);
 }
 
 .student-avatar {
-    font-size: 48px;
-    margin-bottom: 12px;
-    background: var(--blue-light);
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 72px;
+    height: 72px;
+
+    display: grid;
+    place-items: center;
+
+    margin: 0 auto 14px;
+
     border-radius: 50%;
-    border: 3px solid #BFDBFE;
+    background: #EFF6FF;
+
+    font-size: 38px;
+}
+
+.student-avatar.large {
+    width: 92px;
+    height: 92px;
+
+    font-size: 48px;
+    margin-bottom: 16px;
 }
 
 .student-card strong {
-    font-size: 18px;
-    color: var(--text);
     display: block;
-    margin-bottom: 4px;
+    font-size: 20px;
 }
 
-.grade-badge-sm, .grade-badge {
-    background: #FEF3C7;
-    color: #D97706;
-    font-family: 'Fredoka', cursive;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: inline-block;
+.student-card small {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted);
 }
 
 
-/* --- VIEW: PIN --- */
-.pin-container {
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+/* PIN */
+
+.pin-screen {
+    max-width: 460px;
+    text-align: center;
 }
 
 .back-button {
+    display: block;
+    margin-bottom: 40px;
+
+    border: 0;
+    background: transparent;
+
+    color: var(--blue);
     font-weight: 700;
-    color: var(--muted);
-    font-size: 15px;
-    margin-bottom: 20px;
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 12px;
-    border-radius: 12px;
-    transition: background 0.2s;
-}
-
-.back-button:hover {
-    background: #E2E8F0;
-    color: var(--text);
-}
-
-.pin-card {
-    background: var(--surface);
-    border: 3px solid var(--border);
-    border-radius: 28px;
-    padding: 36px 28px;
-    text-align: center;
-    box-shadow: var(--shadow-soft);
-}
-
-.student-avatar-large {
-    font-size: 64px;
-    width: 96px;
-    height: 96px;
-    background: var(--blue-light);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 16px;
-    border: 4px solid #93C5FD;
-}
-
-.pin-card h2 {
-    font-size: 24px;
-    margin: 0 0 4px;
 }
 
 .pin-box {
-    margin-top: 24px;
-    border-top: 2px dashed var(--border);
-    padding-top: 24px;
+    margin-top: 28px;
+
+    background: var(--surface);
+    border-radius: 24px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 8px 30px rgba(15, 23, 42, 0.08);
 }
 
 .pin-box h3 {
-    font-size: 18px;
-    margin: 0 0 4px;
-}
-
-.pin-hint {
-    font-size: 13px;
-    color: var(--muted);
-    margin: 0 0 16px;
+    margin-top: 0;
 }
 
 #student-pin {
     width: 100%;
+
+    padding: 16px;
+
+    border: 2px solid var(--border);
+    border-radius: 14px;
+
     text-align: center;
-    font-size: 32px;
-    letter-spacing: 12px;
-    padding: 14px;
-    border: 3px solid var(--border);
-    border-radius: 16px;
-    margin-bottom: 20px;
-    background: #F8FAFC;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
+    font-size: 28px;
+    letter-spacing: 8px;
+
+    margin-bottom: 16px;
 }
 
 #student-pin:focus {
+    outline: none;
     border-color: var(--blue);
-    background: white;
 }
 
 
-/* --- VIEW: BERANDA SISWA --- */
-.student-home-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 32px 20px;
-}
+/* HOME */
 
 .home-header {
-    background: var(--surface);
-    border: 3px solid var(--border);
-    border-radius: 24px;
-    padding: 20px 24px;
-    box-shadow: var(--shadow-soft);
-    margin-bottom: 28px;
+    margin-bottom: 40px;
 }
 
 .student-identity {
@@ -244,110 +177,116 @@
 }
 
 .student-identity .student-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 32px;
-    margin-bottom: 0;
+    margin: 0;
 }
 
 .greeting {
     margin: 0;
-    font-size: 14px;
     color: var(--muted);
-    font-weight: 600;
 }
 
 .home-header h2 {
-    margin: 2px 0 6px;
-    font-size: 22px;
+    margin: 2px 0;
+    font-size: 28px;
 }
 
-.menu-intro h3 {
-    font-size: 20px;
-    color: var(--text);
-    margin: 0 0 16px 4px;
+.home-header span {
+    color: var(--muted);
 }
+
+
+/* ACTIVITY */
 
 .activity-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
 }
 
-/* Kartu Menu Aktivitas */
 .activity-card {
-    background: var(--surface);
-    border: 3px solid var(--border);
-    border-radius: 20px;
-    padding: 20px;
+    min-height: 180px;
+
     display: flex;
-    align-items: center;
-    gap: 16px;
-    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+
     text-align: left;
-    box-shadow: var(--shadow-card);
-    transition: all 0.2s ease;
+
+    border: 0;
+    border-radius: 24px;
+
+    padding: 24px;
+
+    background: var(--surface);
+
+    box-shadow:
+        0 8px 30px rgba(15, 23, 42, 0.08);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
 }
 
 .activity-card:hover {
     transform: translateY(-3px);
-    box-shadow: var(--shadow-card-hover);
 }
 
-.activity-card:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 0px 0px #CBD5E1;
-}
-
-/* Warna unik per kartu aktivitas */
-.activity-card.quiz { border-color: #93C5FD; }
-.activity-card.quiz:hover { border-color: var(--blue); background: var(--blue-light); }
-.activity-card.quiz .card-icon-wrapper { background: var(--blue-light); }
-
-.activity-card.stem { border-color: #DDD6FE; }
-.activity-card.stem:hover { border-color: var(--purple); background: var(--purple-light); }
-.activity-card.stem .card-icon-wrapper { background: var(--purple-light); }
-
-.activity-card.timed { border-color: #FED7AA; }
-.activity-card.timed:hover { border-color: var(--orange); background: var(--orange-light); }
-.activity-card.timed .card-icon-wrapper { background: var(--orange-light); }
-
-.card-icon-wrapper {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    flex-shrink: 0;
-}
-
-.activity-content {
-    flex-grow: 1;
+.activity-icon {
+    font-size: 42px;
+    margin-bottom: 20px;
 }
 
 .activity-content strong {
-    font-size: 18px;
-    color: var(--text);
     display: block;
-    margin-bottom: 2px;
+    font-size: 21px;
 }
 
 .activity-content small {
+    display: block;
+    margin-top: 7px;
     color: var(--muted);
-    font-size: 14px;
-    font-weight: 600;
+    line-height: 1.4;
 }
 
-.card-arrow {
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--muted);
-    transition: transform 0.2s;
+
+/* ACTIVITY COLORS */
+
+.activity-card.quiz {
+    border-top: 6px solid var(--blue);
 }
 
-.activity-card:hover .card-arrow {
-    transform: translateX(4px);
-    color: var(--text);
+.activity-card.stem {
+    border-top: 6px solid var(--cyan);
+}
+
+.activity-card.timed {
+    border-top: 6px solid var(--orange);
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+    .student-list,
+    .activity-menu {
+        grid-template-columns: 1fr;
+    }
+
+    .student-card {
+        padding: 22px;
+    }
+
+    .activity-card {
+        min-height: 140px;
+    }
+
+    .brand h1 {
+        font-size: 25px;
+    }
+
+    .welcome h2 {
+        font-size: 24px;
+    }
 }
