@@ -24,7 +24,6 @@ export async function getSession(sessionId) {
 }
 
 export async function getActiveSession(studentId) {
-
     const sessions =
         await db.sessions
             .where("student_id")
@@ -44,7 +43,6 @@ export async function deleteSession(sessionId) {
 }
 
 export async function clearStudentSessions(studentId) {
-
     const sessions =
         await db.sessions
             .where("student_id")
