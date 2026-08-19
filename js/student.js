@@ -89,25 +89,32 @@ async function loadStudents() {
 
     try {
 
-        /*
-         * RPC daftar siswa akan ditempatkan
-         * di sini setelah nama fungsi final
-         * dikonfirmasi dari Supabase.
-         */
+        const {
+            data,
+            error: rpcError
+        } = await supabase.rpc(
+            "get_active_students"
+        );
 
-        const students = [];
+        if (rpcError) {
+            throw rpcError;
+        }
 
-        renderStudents(students);
+        renderStudents(data || []);
 
     } catch (err) {
 
-        console.error(err);
+        console.error(
+            "get_active_students:",
+            err
+        );
+
+        container.innerHTML = "";
 
         error.textContent =
             "Data siswa tidak dapat dimuat.";
 
         error.classList.remove("hidden");
-
     }
 }
 
