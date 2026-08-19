@@ -2,13 +2,12 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almascatie Family Learning</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <!-- Google Fonts: Fredoka (Heading/Playful) & Nunito (Body) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Almascatie Family Learning</title>
 
     <link rel="stylesheet" href="./css/global.css">
     <link rel="stylesheet" href="./css/student.css">
@@ -21,30 +20,38 @@
         <!-- =========================================
              VIEW: PILIH SISWA
         ========================================== -->
-        <section id="view-student-select" class="view active">
-            <div class="student-select-container">
+        <section
+            id="view-student-select"
+            class="view active"
+        >
+            <div class="student-select">
 
                 <header class="brand">
-                    <div class="brand-badge">
-                        <span class="brand-icon">🤖</span>
-                    </div>
+                    <div class="brand-mark">🌟</div>
+
                     <h1>ALMASCATIE</h1>
                     <p>FAMILY LEARNING</p>
                 </header>
 
                 <div class="welcome">
-                    <h2>Siapa kamu hari ini? ✨</h2>
-                    <p>Pilih namamu untuk mulai berpetualang!</p>
+                    <h2>Siapa kamu?</h2>
+                    <p>Pilih namamu untuk mulai belajar.</p>
                 </div>
 
-                <div id="student-list" class="student-list" aria-live="polite">
+                <div
+                    id="student-list"
+                    class="student-list"
+                    aria-live="polite"
+                >
                     <div class="loading">
-                        <div class="spinner">🤖</div>
-                        <p>Menyiapkan petualangan...</p>
+                        Memuat...
                     </div>
                 </div>
 
-                <div id="student-error" class="message error hidden"></div>
+                <div
+                    id="student-error"
+                    class="message error hidden"
+                ></div>
 
             </div>
         </section>
@@ -53,42 +60,62 @@
         <!-- =========================================
              VIEW: PIN
         ========================================== -->
-        <section id="view-pin" class="view hidden">
-            <div class="pin-container">
+        <section
+            id="view-pin"
+            class="view hidden"
+        >
+            <div class="pin-screen">
 
-                <button id="btn-back-student" class="back-button" type="button">
-                    ← Ganti Nama
+                <button
+                    id="btn-back-student"
+                    class="back-button"
+                    type="button"
+                >
+                    ← Kembali
                 </button>
 
-                <div class="pin-card">
-                    <div id="selected-student-avatar" class="student-avatar-large">
-                        👧
-                    </div>
+                <div
+                    id="selected-student-avatar"
+                    class="student-avatar large"
+                >
+                    👧
+                </div>
 
-                    <h2 id="selected-student-name">Nama</h2>
-                    <p id="selected-student-grade" class="grade-badge">Kelas</p>
+                <h2 id="selected-student-name">
+                    Nama
+                </h2>
 
-                    <div class="pin-box">
-                        <h3>Masukkan PIN Rahasia</h3>
-                        <p class="pin-hint">Minta bantuan Admin jika lupa ya!</p>
+                <p id="selected-student-grade">
+                    Kelas
+                </p>
 
-                        <input
-                            id="student-pin"
-                            type="password"
-                            inputmode="numeric"
-                            pattern="[0-9]*"
-                            maxlength="4"
-                            autocomplete="off"
-                            placeholder="••••"
-                            aria-label="PIN siswa"
-                        >
+                <div class="pin-box">
 
-                        <button id="btn-login" class="primary-button" type="button">
-                            🚀 Masuk Belajar
-                        </button>
+                    <h3>Masukkan PIN</h3>
 
-                        <div id="pin-error" class="message error hidden"></div>
-                    </div>
+                    <input
+                        id="student-pin"
+                        type="password"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        maxlength="4"
+                        autocomplete="off"
+                        aria-label="PIN siswa"
+                    >
+
+                    <button
+                        id="btn-login"
+                        class="primary-button"
+                        type="button"
+                    >
+                        Masuk
+                    </button>
+
+                    <div
+                        id="pin-error"
+                        class="message error hidden"
+                    ></div>
+
                 </div>
 
             </div>
@@ -98,53 +125,87 @@
         <!-- =========================================
              VIEW: BERANDA SISWA
         ========================================== -->
-        <section id="view-home" class="view hidden">
-            <div class="student-home-container">
+        <section
+            id="view-home"
+            class="view hidden"
+        >
+            <div class="student-home">
 
                 <header class="home-header">
+
                     <div class="student-identity">
-                        <div id="home-avatar" class="student-avatar">
+
+                        <div
+                            id="home-avatar"
+                            class="student-avatar"
+                        >
                             👧
                         </div>
+
                         <div>
-                            <p class="greeting">Halo, senang berjumpa lagi! 👋</p>
-                            <h2 id="home-student-name">Nama</h2>
-                            <span id="home-student-grade" class="grade-badge-sm">Kelas</span>
+                            <p class="greeting">Halo!</p>
+
+                            <h2 id="home-student-name">
+                                Nama
+                            </h2>
+
+                            <span id="home-student-grade">
+                                Kelas
+                            </span>
                         </div>
+
                     </div>
+
                 </header>
 
-                <div class="menu-intro">
-                    <h3>Mau petualangan apa hari ini?</h3>
-                </div>
 
                 <section class="activity-menu">
 
-                    <button class="activity-card quiz" data-activity="quiz" type="button">
-                        <div class="card-icon-wrapper">🎯</div>
-                        <div class="activity-content">
-                            <strong>Kuis Seru</strong>
-                            <small>Uji pemahaman pelajaran sekolah</small>
-                        </div>
-                        <span class="card-arrow">→</span>
+                    <button
+                        class="activity-card quiz"
+                        data-activity="quiz"
+                        type="button"
+                    >
+                        <span class="activity-icon">🎯</span>
+
+                        <span class="activity-content">
+                            <strong>Kuis</strong>
+                            <small>
+                                Belajar dan uji pemahaman
+                            </small>
+                        </span>
                     </button>
 
-                    <button class="activity-card stem" data-activity="stem" type="button">
-                        <div class="card-icon-wrapper">🧠</div>
-                        <div class="activity-content">
-                            <strong>STEM & Logika</strong>
-                            <small>Pola, urutan, puzzle & robot maze</small>
-                        </div>
-                        <span class="card-arrow">→</span>
+
+                    <button
+                        class="activity-card stem"
+                        data-activity="stem"
+                        type="button"
+                    >
+                        <span class="activity-icon">🔬</span>
+
+                        <span class="activity-content">
+                            <strong>STEM</strong>
+                            <small>
+                                Eksplorasi dan permainan
+                            </small>
+                        </span>
                     </button>
 
-                    <button class="activity-card timed" data-activity="timed" type="button">
-                        <div class="card-icon-wrapper">⏱️</div>
-                        <div class="activity-content">
+
+                    <button
+                        class="activity-card timed"
+                        data-activity="timed"
+                        type="button"
+                    >
+                        <span class="activity-icon">⏱️</span>
+
+                        <span class="activity-content">
                             <strong>Tantangan Waktu</strong>
-                            <small>Kecepatan dan ketepatan menjawab</small>
-                        </div>
-                        <span class="card-arrow">→</span>
+                            <small>
+                                Tantangan dengan batas waktu
+                            </small>
+                        </span>
                     </button>
 
                 </section>
@@ -154,9 +215,12 @@
 
     </main>
 
-    <!-- Supabase & Dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/dexie@4.2.0/dist/dexie.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Supabase -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+
     <script type="module" src="./js/app.js"></script>
 
 </body>
