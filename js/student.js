@@ -1,14 +1,68 @@
 import { supabase } from "./supabase.js";
+import {
+    db,
+    saveSession
+} from "./storage.js";
 
 const state = {
     selectedStudent: null
 };
 
-export function initStudentApp() {
+export async function initStudentApp() {
     bindEvents();
-    showView("view-student-select");
 
+    const recovered = await recoverSession();
+    if (recovered) {
+        return;
+    }
+
+    showView("view-student-select");
     loadStudents();
+}
+
+
+/* ================================
+   SESSION RECOVERY
+================================ */
+
+async function recoverSession() {
+    try {
+        const sessions = await db.sessions.toArray();
+        if (!sessions.length) {
+            return false;
+        }
+
+        const now = Date.now();
+        const session = sessions.find(
+            item => new Date(item.expires_at).getTime() > now
+        );
+
+        if (!session) {
+            return false;
+        }
+
+        const { data, error } = await supabase.rpc(
+            "validate_student_session",
+            {
+                p_session_token: session.session_token
+            }
+        );
+
+        if (error || !data) {
+            return false;
+        }
+
+        // Sesi valid, langsung masuk ke beranda
+        document.getElementById("home-avatar").textContent = session.avatar || "👧";
+        document.getElementById("home-student-name").textContent = session.student_name;
+        document.getElementById("home-student-grade").textContent = `Kelas ${session.grade}`;
+
+        showView("view-home");
+        return true;
+    } catch (err) {
+        console.error("Session recovery error:", err);
+        return false;
+    }
 }
 
 
@@ -17,60 +71,39 @@ export function initStudentApp() {
 ================================ */
 
 function bindEvents() {
-
     document
         .getElementById("btn-back-student")
         .addEventListener("click", () => {
             state.selectedStudent = null;
-
-            document
-                .getElementById("student-pin")
-                .value = "";
-
+            document.getElementById("student-pin").value = "";
             showView("view-student-select");
         });
-
 
     document
         .getElementById("btn-login")
         .addEventListener("click", loginStudent);
 
-
     document
         .getElementById("student-pin")
         .addEventListener("keydown", (event) => {
-
             if (event.key === "Enter") {
                 loginStudent();
             }
-
         });
-
 
     document
         .querySelectorAll("[data-activity]")
         .forEach((button) => {
-
             button.addEventListener("click", () => {
-
-                const activity =
-                    button.dataset.activity;
-
-                console.log(
-                    "Activity selected:",
-                    activity
-                );
-
+                const activity = button.dataset.activity;
+                console.log("Activity selected:", activity);
                 /*
                  * Nanti:
-                 *
                  * quiz  → quiz.js
                  * stem  → stem.js
                  * timed → timed.js
                  */
-
             });
-
         });
 }
 
@@ -80,19 +113,11 @@ function bindEvents() {
 ================================ */
 
 async function loadStudents() {
-
-    const container =
-        document.getElementById("student-list");
-
-    const error =
-        document.getElementById("student-error");
+    const container = document.getElementById("student-list");
+    const error = document.getElementById("student-error");
 
     try {
-
-        const {
-            data,
-            error: rpcError
-        } = await supabase.rpc(
+        const { data, error: rpcError } = await supabase.rpc(
             "get_active_students"
         );
 
@@ -103,17 +128,9 @@ async function loadStudents() {
         renderStudents(data || []);
 
     } catch (err) {
-
-        console.error(
-            "get_active_students:",
-            err
-        );
-
+        console.error("get_active_students:", err);
         container.innerHTML = "";
-
-        error.textContent =
-            "Data siswa tidak dapat dimuat.";
-
+        error.textContent = "Data siswa tidak dapat dimuat.";
         error.classList.remove("hidden");
     }
 }
@@ -124,54 +141,37 @@ async function loadStudents() {
 ================================ */
 
 function renderStudents(students) {
-
-    const container =
-        document.getElementById("student-list");
-
+    const container = document.getElementById("student-list");
     container.innerHTML = "";
 
     if (!students.length) {
-
         container.innerHTML = `
             <div class="loading">
                 Belum ada data siswa.
             </div>
         `;
-
         return;
     }
 
-
     students.forEach((student) => {
-
-        const button =
-            document.createElement("button");
-
+        const button = document.createElement("button");
         button.type = "button";
-
         button.className = "student-card";
 
         button.innerHTML = `
             <div class="student-avatar">
                 ${student.avatar || "👧"}
             </div>
-
             <strong>
                 ${escapeHtml(student.name)}
             </strong>
-
             <small>
                 Kelas ${student.grade}
             </small>
         `;
 
-        button.addEventListener(
-            "click",
-            () => selectStudent(student)
-        );
-
+        button.addEventListener("click", () => selectStudent(student));
         container.appendChild(button);
-
     });
 }
 
@@ -181,35 +181,18 @@ function renderStudents(students) {
 ================================ */
 
 function selectStudent(student) {
-
     state.selectedStudent = student;
 
-    document
-        .getElementById("selected-student-avatar")
-        .textContent = student.avatar || "👧";
-
-    document
-        .getElementById("selected-student-name")
-        .textContent = student.name;
-
-    document
-        .getElementById("selected-student-grade")
-        .textContent = `Kelas ${student.grade}`;
-
-    document
-        .getElementById("student-pin")
-        .value = "";
-
-    document
-        .getElementById("pin-error")
-        .classList.add("hidden");
+    document.getElementById("selected-student-avatar").textContent = student.avatar || "👧";
+    document.getElementById("selected-student-name").textContent = student.name;
+    document.getElementById("selected-student-grade").textContent = `Kelas ${student.grade}`;
+    document.getElementById("student-pin").value = "";
+    document.getElementById("pin-error").classList.add("hidden");
 
     showView("view-pin");
 
     setTimeout(() => {
-        document
-            .getElementById("student-pin")
-            .focus();
+        document.getElementById("student-pin").focus();
     }, 100);
 }
 
@@ -219,106 +202,59 @@ function selectStudent(student) {
 ================================ */
 
 async function loginStudent() {
-
     if (!state.selectedStudent) {
         return;
     }
 
-    const pinInput =
-        document.getElementById("student-pin");
-
-    const error =
-        document.getElementById("pin-error");
-
-    const pin =
-        pinInput.value.trim();
-
+    const pinInput = document.getElementById("student-pin");
+    const error = document.getElementById("pin-error");
+    const pin = pinInput.value.trim();
 
     if (!/^\d{4}$/.test(pin)) {
-
-        error.textContent =
-            "PIN harus terdiri dari 4 angka.";
-
+        error.textContent = "PIN harus terdiri dari 4 angka.";
         error.classList.remove("hidden");
-
         return;
     }
 
-
-    const button =
-        document.getElementById("btn-login");
-
+    const button = document.getElementById("btn-login");
     button.disabled = true;
-
     error.classList.add("hidden");
 
-
     try {
-
-        const { data, error: rpcError } =
-            await supabase.rpc(
-                "student_login",
-                {
-                    p_student_id:
-                        state.selectedStudent.id,
-
-                    p_pin: pin
-                }
-            );
-
+        const { data, error: rpcError } = await supabase.rpc(
+            "student_login",
+            {
+                p_student_id: state.selectedStudent.id,
+                p_pin: pin
+            }
+        );
 
         if (rpcError) {
             throw rpcError;
         }
 
-
-        const result =
-            Array.isArray(data)
-                ? data[0]
-                : data;
-
+        const result = Array.isArray(data) ? data[0] : data;
 
         if (!result) {
             showLoginError("INVALID_PIN");
             return;
         }
 
+        // Simpan sesi ke IndexedDB (menggantikan localStorage)
+        await saveSession(result);
 
-        /*
-         * Session siswa disimpan oleh
-         * modul session/storage pada tahap berikutnya.
-         *
-         * Jangan menggunakan localStorage.
-         */
+        document.getElementById("home-avatar").textContent =
+            result.avatar || state.selectedStudent.avatar || "👧";
 
-        window.studentSession = result;
+        document.getElementById("home-student-name").textContent =
+            result.student_name || state.selectedStudent.name;
 
-        document
-            .getElementById("home-avatar")
-            .textContent =
-                result.avatar ||
-                state.selectedStudent.avatar ||
-                "👧";
-
-        document
-            .getElementById("home-student-name")
-            .textContent =
-                result.student_name ||
-                state.selectedStudent.name;
-
-        document
-            .getElementById("home-student-grade")
-            .textContent =
-                `Kelas ${
-                    result.grade ||
-                    state.selectedStudent.grade
-                }`;
+        document.getElementById("home-student-grade").textContent =
+            `Kelas ${result.grade || state.selectedStudent.grade}`;
 
         showView("view-home");
 
-
     } catch (err) {
-
         console.error("Login error:", err);
 
         let errorCode = "INVALID_PIN";
@@ -333,9 +269,7 @@ async function loginStudent() {
         showLoginError(errorCode);
 
     } finally {
-
         button.disabled = false;
-
     }
 }
 
@@ -345,31 +279,16 @@ async function loginStudent() {
 ================================ */
 
 function showLoginError(code) {
-
-    const error =
-        document.getElementById("pin-error");
+    const error = document.getElementById("pin-error");
 
     const messages = {
-
-        INVALID_PIN:
-            "PIN salah. Coba lagi.",
-
-        PIN_TEMPORARILY_LOCKED:
-            "PIN terkunci sementara. Coba lagi nanti.",
-
-        STUDENT_NOT_FOUND:
-            "Siswa tidak ditemukan.",
-
-        STUDENT_INACTIVE:
-            "Akun siswa sedang tidak aktif."
-
+        INVALID_PIN: "PIN salah. Coba lagi.",
+        PIN_TEMPORARILY_LOCKED: "PIN terkunci sementara. Coba lagi nanti.",
+        STUDENT_NOT_FOUND: "Siswa tidak ditemukan.",
+        STUDENT_INACTIVE: "Akun siswa sedang tidak aktif."
     };
 
-
-    error.textContent =
-        messages[code] ||
-        "Tidak dapat masuk.";
-
+    error.textContent = messages[code] || "Tidak dapat masuk.";
     error.classList.remove("hidden");
 }
 
@@ -379,22 +298,16 @@ function showLoginError(code) {
 ================================ */
 
 function showView(id) {
+    document.querySelectorAll(".view").forEach((view) => {
+        view.classList.add("hidden");
+        view.classList.remove("active");
+    });
 
-    document
-        .querySelectorAll(".view")
-        .forEach((view) => {
-
-            view.classList.add("hidden");
-            view.classList.remove("active");
-
-        });
-
-
-    const target =
-        document.getElementById(id);
-
-    target.classList.remove("hidden");
-    target.classList.add("active");
+    const target = document.getElementById(id);
+    if (target) {
+        target.classList.remove("hidden");
+        target.classList.add("active");
+    }
 }
 
 
@@ -403,7 +316,6 @@ function showView(id) {
 ================================ */
 
 function escapeHtml(value) {
-
     return String(value)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
