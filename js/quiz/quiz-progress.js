@@ -1,23 +1,23 @@
 import { db } from "../storage.js";
 
 export async function saveQuizProgress(session, state) {
-    if (!session || !state.attemptId || !state.packageId) return;
+    if (!session || !state?.attemptId || !state?.packageId) return;
 
     await db.quiz_progress.put({
         student_id: session.student_id,
         session_id: session.session_id,
         package_id: state.packageId,
         attempt_id: state.attemptId,
-        currentIndex: state.currentIndex,
-        correctCount: state.correctCount,
-        wrongCount: state.wrongCount,
-        questionsLength: state.questions.length,
+        currentIndex: state.currentIndex || 0,
+        correctCount: state.correctCount || 0,
+        wrongCount: state.wrongCount || 0,
+        questionsLength: state.questions?.length || 0,
         updated_at: new Date().toISOString()
     });
 }
 
 export async function getQuizProgress(session, packageId, questionsLength) {
-    if (!session) return null;
+    if (!session || !packageId) return null;
 
     try {
         const progress = await db.quiz_progress.get([
@@ -45,7 +45,7 @@ export async function getQuizProgress(session, packageId, questionsLength) {
 }
 
 export async function clearQuizProgress(session, packageId) {
-    if (!session) return;
+    if (!session || !packageId) return;
 
     try {
         await db.quiz_progress.delete([
