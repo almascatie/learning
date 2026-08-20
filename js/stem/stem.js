@@ -91,52 +91,26 @@ async function loadStemActivity(activity) {
         }
 
         /*
-         * Untuk sementara tampilkan data aktivitas.
-         * Nanti isi aktivitas STEM Gempa
-         * akan dirender di bagian ini.
+         * Aktivitas STEM memiliki renderer sendiri.
+         * Contoh gempa.js:
+         *
+         * export default {
+         *     ...
+         *     render(container) {
+         *         container.innerHTML = `...`;
+         *     }
+         * }
+         *
+         * Jadi jangan mengganti isi aktivitas
+         * dengan placeholder di sini.
          */
-        content.innerHTML = `
-            <div
-                style="
-                    background:var(--surface);
-                    border:3px solid var(--border);
-                    border-radius:24px;
-                    padding:24px;
-                    text-align:center;
-                "
-            >
+        if (typeof activityData.render !== "function") {
+            throw new Error(
+                "Aktivitas STEM tidak memiliki fungsi render(container)."
+            );
+        }
 
-                <div
-                    style="
-                        font-size:64px;
-                        margin-bottom:16px;
-                    "
-                >
-                    ${activityData.icon || activity.icon || "🔬"}
-                </div>
-
-                <h2>
-                    ${escapeHtml(
-                        activityData.title ||
-                        activity.title ||
-                        ""
-                    )}
-                </h2>
-
-                <p style="color:var(--muted);">
-                    ${escapeHtml(
-                        activityData.description ||
-                        activity.description ||
-                        ""
-                    )}
-                </p>
-
-                <p>
-                    Aktivitas STEM siap dikembangkan.
-                </p>
-
-            </div>
-        `;
+        activityData.render(content);
 
         const quitButton =
             document.getElementById("btn-quit-stem");
