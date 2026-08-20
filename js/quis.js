@@ -1,6 +1,6 @@
 import { supabase } from "./supabase.js";
 import { db } from "./storage.js";
-import { initQuiz } from "./quiz.js";
+import { initQuiz } from "./quis.js";
 let quizState = {
     attemptId: null,
     packageId: null,
