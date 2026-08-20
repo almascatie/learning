@@ -3,6 +3,7 @@ import {
     renderTimedContainer
 } from "./timed-ui.js";
 
+
 export async function openTimedPackages(grade) {
     const studentGrade = Number(grade);
 
@@ -12,32 +13,56 @@ export async function openTimedPackages(grade) {
     }
 
     try {
-        const manifestUrl = new URL("../../timed/manifest.js", import.meta.url);
-        const module = await import(manifestUrl.href);
+        const manifestUrl = new URL(
+            "../../timed/manifest.js",
+            import.meta.url
+        );
 
-        const manifest = module.timedManifest || [];
+        const module =
+            await import(manifestUrl.href);
+
+        const manifest =
+            module.timedManifest || [];
 
         const packages = manifest
-            .filter(item => Number(item.grade) === studentGrade)
+            .filter(
+                item =>
+                    Number(item.grade) === studentGrade
+            )
             .map(item => ({
                 ...item,
-                onOpen: () => loadTimedActivity(item)
+                onOpen: () =>
+                    loadTimedActivity(item)
             }));
 
         renderTimedPackages(packages);
 
-        document
-            .getElementById("btn-back-timed-home")
-            ?.addEventListener("click", () => {
-                showView("view-home");
-            });
+        const backButton =
+            document.getElementById(
+                "btn-back-timed-home"
+            );
+
+        if (backButton) {
+            backButton.addEventListener(
+                "click",
+                () => {
+                    showView("view-home");
+                }
+            );
+        }
 
     } catch (err) {
-        console.error("Gagal memuat manifest Tantangan Waktu:", err);
+        console.error(
+            "Gagal memuat manifest Tantangan Waktu:",
+            err
+        );
 
         renderTimedPackages([]);
 
-        const list = document.getElementById("timed-package-list");
+        const list =
+            document.getElementById(
+                "timed-package-list"
+            );
 
         if (list) {
             list.innerHTML = `
@@ -49,13 +74,24 @@ export async function openTimedPackages(grade) {
     }
 }
 
+
 async function loadTimedActivity(activity) {
     try {
-        const manifestUrl = new URL("../../timed/manifest.js", import.meta.url);
-        const activityUrl = new URL(activity.file, manifestUrl);
+        const manifestUrl = new URL(
+            "../../timed/manifest.js",
+            import.meta.url
+        );
 
-        const module = await import(activityUrl.href);
-        const activityData = module.default;
+        const activityUrl = new URL(
+            activity.file,
+            manifestUrl
+        );
+
+        const module =
+            await import(activityUrl.href);
+
+        const activityData =
+            module.default;
 
         if (!activityData) {
             throw new Error(
@@ -69,10 +105,15 @@ async function loadTimedActivity(activity) {
             "Tantangan Waktu"
         );
 
-        const content = document.getElementById("timed-content");
+        const content =
+            document.getElementById(
+                "timed-content"
+            );
 
         if (!content) {
-            throw new Error("Element #timed-content tidak ditemukan.");
+            throw new Error(
+                "Element #timed-content tidak ditemukan."
+            );
         }
 
         content.innerHTML = `
@@ -85,6 +126,7 @@ async function loadTimedActivity(activity) {
                     text-align:center;
                 "
             >
+
                 <div
                     style="
                         font-size:64px;
@@ -113,14 +155,25 @@ async function loadTimedActivity(activity) {
                 <p>
                     Tantangan waktu siap dikembangkan.
                 </p>
+
             </div>
         `;
 
-        document
-            .getElementById("btn-quit-timed")
-            ?.addEventListener("click", () => {
-                openTimedPackages(activity.grade);
-            });
+        const quitButton =
+            document.getElementById(
+                "btn-quit-timed"
+            );
+
+        if (quitButton) {
+            quitButton.addEventListener(
+                "click",
+                () => {
+                    openTimedPackages(
+                        activity.grade
+                    );
+                }
+            );
+        }
 
     } catch (err) {
         console.error(
@@ -128,9 +181,12 @@ async function loadTimedActivity(activity) {
             err
         );
 
-        alert("Tantangan Waktu tidak dapat dibuka.");
+        alert(
+            "Tantangan Waktu tidak dapat dibuka."
+        );
     }
 }
+
 
 function showView(id) {
     document.querySelectorAll(".view").forEach(view => {
@@ -138,13 +194,15 @@ function showView(id) {
         view.classList.remove("active");
     });
 
-    const target = document.getElementById(id);
+    const target =
+        document.getElementById(id);
 
     if (target) {
         target.classList.remove("hidden");
         target.classList.add("active");
     }
 }
+
 
 function escapeHtml(value) {
     return String(value)
