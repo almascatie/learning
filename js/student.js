@@ -4,7 +4,7 @@ import {
     saveSession,
     deleteSession
 } from "./storage.js";
-import { openQuizPackages } from "./quiz.js";
+import { openQuizPackages } from "./quis.js";
 
 
 const state = {
