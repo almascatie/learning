@@ -4,14 +4,7 @@ import {
 } from "./stem-ui.js";
 
 
-export async function openStemPackages(grade) {
-    const studentGrade = Number(grade);
-
-    if (!studentGrade) {
-        console.error("Grade siswa tidak ditemukan.");
-        return;
-    }
-
+export async function openStemPackages() {
     try {
         const manifestUrl = new URL(
             "../../stem/manifest.js",
@@ -22,12 +15,10 @@ export async function openStemPackages(grade) {
 
         const manifest = module.stemManifest || [];
 
-        const packages = manifest
-            .filter(item => Number(item.grade) === studentGrade)
-            .map(item => ({
-                ...item,
-                onOpen: () => loadStemActivity(item)
-            }));
+        const packages = manifest.map(item => ({
+            ...item,
+            onOpen: () => loadStemActivity(item)
+        }));
 
         renderStemPackages(packages);
 
@@ -99,6 +90,11 @@ async function loadStemActivity(activity) {
             );
         }
 
+        /*
+         * Untuk sementara tampilkan data aktivitas.
+         * Nanti isi aktivitas STEM Gempa
+         * akan dirender di bagian ini.
+         */
         content.innerHTML = `
             <div
                 style="
@@ -147,7 +143,7 @@ async function loadStemActivity(activity) {
 
         if (quitButton) {
             quitButton.addEventListener("click", () => {
-                openStemPackages(activity.grade);
+                openStemPackages();
             });
         }
 
