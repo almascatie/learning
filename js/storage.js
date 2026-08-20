@@ -1,14 +1,11 @@
 const db = new Dexie("almascatie_family_learning");
 
-db.version(1).stores({
+db.version(2).stores({
     sessions: "session_id, student_id, expires_at",
     attempts: "attempt_id, student_id, session_id, status",
     answers: "[attempt_id+question_id], attempt_id, student_id, session_id, status",
-    sync_queue: "++id, student_id, session_id, attempt_id, status, created_at"
-});
-
-db.version(2).stores({
-    quizProgress: "[student_id+package_id], student_id, package_id, attempt_id, current_index, updated_at"
+    sync_queue: "++id, student_id, session_id, attempt_id, status, created_at",
+    quiz_progress: "[student_id+session_id+package_id], student_id, session_id, package_id, attempt_id"
 });
 
 export async function saveSession(session) {
@@ -28,16 +25,9 @@ export async function getSession(sessionId) {
 }
 
 export async function getActiveSession(studentId) {
-    const sessions = await db.sessions
-        .where("student_id")
-        .equals(studentId)
-        .toArray();
-
+    const sessions = await db.sessions.where("student_id").equals(studentId).toArray();
     const now = Date.now();
-
-    return sessions.find(
-        session => new Date(session.expires_at).getTime() > now
-    ) || null;
+    return sessions.find(session => new Date(session.expires_at).getTime() > now) || null;
 }
 
 export async function deleteSession(sessionId) {
@@ -45,14 +35,8 @@ export async function deleteSession(sessionId) {
 }
 
 export async function clearStudentSessions(studentId) {
-    const sessions = await db.sessions
-        .where("student_id")
-        .equals(studentId)
-        .toArray();
-
-    await db.sessions.bulkDelete(
-        sessions.map(session => session.session_id)
-    );
+    const sessions = await db.sessions.where("student_id").equals(studentId).toArray();
+    await db.sessions.bulkDelete(sessions.map(session => session.session_id));
 }
 
 export { db };
