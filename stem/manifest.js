@@ -1,1 +1,10 @@
-export const stemManifest = [];
+export const timedManifest = [
+    {
+        id: "stem-k2-001",
+        grade: 2,
+        title: "stem 1 gempa",
+        description: "tugas gempa",
+        icon: "⏱️",
+        file: "./kelas-2/timed-001.js"
+    }
+];
