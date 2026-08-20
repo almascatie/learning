@@ -3,7 +3,6 @@ import {
     renderStemContainer
 } from "./stem-ui.js";
 
-
 export async function openStemPackages() {
     try {
         const manifestUrl = new URL(
@@ -12,7 +11,6 @@ export async function openStemPackages() {
         );
 
         const module = await import(manifestUrl.href);
-
         const manifest = module.stemManifest || [];
 
         const packages = manifest.map(item => ({
@@ -52,7 +50,6 @@ export async function openStemPackages() {
     }
 }
 
-
 async function loadStemActivity(activity) {
     try {
         const manifestUrl = new URL(
@@ -66,7 +63,6 @@ async function loadStemActivity(activity) {
         );
 
         const module = await import(activityUrl.href);
-
         const activityData = module.default;
 
         if (!activityData) {
@@ -90,27 +86,17 @@ async function loadStemActivity(activity) {
             );
         }
 
-        /*
-         * Aktivitas STEM memiliki renderer sendiri.
-         * Contoh gempa.js:
-         *
-         * export default {
-         *     ...
-         *     render(container) {
-         *         container.innerHTML = `...`;
-         *     }
-         * }
-         *
-         * Jadi jangan mengganti isi aktivitas
-         * dengan placeholder di sini.
-         */
         if (typeof activityData.render !== "function") {
             throw new Error(
                 "Aktivitas STEM tidak memiliki fungsi render(container)."
             );
         }
 
-        activityData.render(content);
+        activityData.render(content, {
+            onFinish: () => {
+                openStemPackages();
+            }
+        });
 
         const quitButton =
             document.getElementById("btn-quit-stem");
@@ -131,7 +117,6 @@ async function loadStemActivity(activity) {
     }
 }
 
-
 function showView(id) {
     document.querySelectorAll(".view").forEach(view => {
         view.classList.add("hidden");
@@ -146,7 +131,6 @@ function showView(id) {
         target.classList.add("active");
     }
 }
-
 
 function escapeHtml(value) {
     return String(value)
