@@ -2,10 +2,13 @@ import { supabase } from "./supabase.js";
 import {
     db,
     saveSession
+    deleteSession
 } from "./storage.js";
 
 const state = {
     selectedStudent: null
+        sessionId: null
+
 };
 
 export async function initStudentApp() {
