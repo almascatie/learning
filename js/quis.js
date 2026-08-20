@@ -1,7 +1,6 @@
 import { supabase } from "./supabase.js";
 import { db } from "./storage.js";
-import { quizManifest } from "../soal/manifest.js";
-
+import { initQuiz } from "./quiz.js";
 
 let quizState = {
     attemptId: null,
