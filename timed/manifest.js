@@ -5,6 +5,5 @@ export const timedManifest = [
         title: "Tantangan Waktu 1",
         description: "Tantangan dengan batas waktu",
         icon: "⏱️",
-        file: "./kelas-2/timed-001.js"
     }
 ];
