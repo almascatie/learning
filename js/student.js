@@ -2,6 +2,7 @@ import { supabase } from "./supabase.js";
 import { db, saveSession, deleteSession } from "./storage.js";
 import { openActivity } from "./activity.js";
 import { openQuizPackages } from "./quiz/quiz.js";
+import { openStemPackages } from "./stem/stem.js";
 
 const state = {
     selectedStudent: null,
@@ -91,6 +92,17 @@ function bindEvents() {
                 }
 
                 openQuizPackages(grade);
+                return;
+            }
+            if (activity === "stem") {
+                const grade = state.selectedStudent?.grade;
+            
+                if (!grade) {
+                    console.error("Grade siswa tidak ditemukan.");
+                    return;
+                }
+            
+                openStemPackages(grade);
                 return;
             }
 
