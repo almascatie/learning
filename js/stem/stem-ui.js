@@ -6,16 +6,20 @@ export function renderStemPackages(packages) {
         return;
     }
 
+    // Sembunyikan semua view yang sedang aktif
     document.querySelectorAll(".view").forEach(view => {
         view.classList.add("hidden");
         view.classList.remove("active");
     });
 
-    const oldView = document.getElementById("view-stem-packages");
-    if (oldView) {
-        oldView.remove();
+    // Hapus view STEM lama jika ada
+    const oldStemView = document.getElementById("view-stem-packages");
+
+    if (oldStemView) {
+        oldStemView.remove();
     }
 
+    // Buat view STEM baru
     const stemView = document.createElement("section");
 
     stemView.id = "view-stem-packages";
@@ -53,6 +57,7 @@ export function renderStemPackages(packages) {
         </div>
     `;
 
+    // Tambahkan tanpa menghapus view-home
     app.appendChild(stemView);
 
     const list = document.getElementById("stem-package-list");
@@ -62,7 +67,7 @@ export function renderStemPackages(packages) {
         return;
     }
 
-    if (!packages.length) {
+    if (!packages || !packages.length) {
         list.innerHTML = `
             <div class="loading">
                 Belum ada aktivitas STEM.
@@ -83,6 +88,7 @@ export function renderStemPackages(packages) {
             </span>
 
             <span class="activity-content">
+
                 <strong>
                     ${escapeHtml(item.title || item.id)}
                 </strong>
@@ -93,14 +99,95 @@ export function renderStemPackages(packages) {
                         "Eksplorasi dan permainan"
                     )}
                 </small>
+
             </span>
         `;
 
-        button.addEventListener(
-            "click",
-            () => item.onOpen?.()
-        );
+        button.addEventListener("click", () => {
+            item.onOpen?.();
+        });
 
         list.appendChild(button);
     });
+}
+
+
+export function renderStemContainer(title = "STEM") {
+    const app = document.getElementById("app");
+
+    if (!app) {
+        console.error("Element #app tidak ditemukan.");
+        return;
+    }
+
+    // Sembunyikan semua view
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.add("hidden");
+        view.classList.remove("active");
+    });
+
+    // Hapus view STEM lama
+    const oldStemView = document.getElementById("view-stem");
+
+    if (oldStemView) {
+        oldStemView.remove();
+    }
+
+    // Buat view STEM baru
+    const stemView = document.createElement("section");
+
+    stemView.id = "view-stem";
+    stemView.className = "view active";
+
+    stemView.innerHTML = `
+        <div
+            class="quiz-container"
+            style="
+                max-width:600px;
+                margin:0 auto;
+                padding:24px 16px;
+            "
+        >
+
+            <header
+                class="quiz-header"
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:24px;
+                "
+            >
+
+                <button
+                    id="btn-quit-stem"
+                    class="back-button"
+                    type="button"
+                >
+                    ← Keluar
+                </button>
+
+                <strong>
+                    ${escapeHtml(title)}
+                </strong>
+
+            </header>
+
+            <div id="stem-content"></div>
+
+        </div>
+    `;
+
+    // Tambahkan tanpa menghapus view-home
+    app.appendChild(stemView);
+}
+
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
