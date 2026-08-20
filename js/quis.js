@@ -13,23 +13,64 @@ let quizState = {
 };
 
 /* ================================
-   QUIZ PROGRESS STORAGE
+   LOCAL QUIZ PROGRESS
 ================================ */
 
-let progressTableReady = false;
+function getProgressStorageKey(session, packageId) {
+    return `quiz_progress_${session.student_id}_${session.session_id}_${packageId}`;
+}
 
-async function ensureProgressTable() {
-    if (progressTableReady) return;
+function saveQuizProgress(session, resumeIndex = quizState.currentIndex) {
+    if (!session || !quizState.attemptId || !quizState.packageId) return;
+
+    const key = getProgressStorageKey(session, quizState.packageId);
+
+    localStorage.setItem(key, JSON.stringify({
+        student_id: session.student_id,
+        session_id: session.session_id,
+        package_id: quizState.packageId,
+        attempt_id: quizState.attemptId,
+        currentIndex: resumeIndex,
+        correctCount: quizState.correctCount,
+        wrongCount: quizState.wrongCount,
+        questionsLength: quizState.questions.length,
+        updated_at: new Date().toISOString()
+    }));
+}
+
+function getQuizProgress(session, packageId, questionsLength) {
+    if (!session) return null;
+
+    const key = getProgressStorageKey(session, packageId);
+    const raw = localStorage.getItem(key);
+
+    if (!raw) return null;
 
     try {
-        db.version(2).stores({
-            quiz_progress: "[student_id+session_id+package_id], student_id, session_id, package_id, attempt_id"
-        });
+        const progress = JSON.parse(raw);
 
-        progressTableReady = true;
+        if (
+            progress.package_id !== packageId ||
+            progress.questionsLength !== questionsLength ||
+            !progress.attempt_id
+        ) {
+            localStorage.removeItem(key);
+            return null;
+        }
+
+        return progress;
     } catch (err) {
-        console.error("Gagal menyiapkan tabel progress kuis:", err);
+        console.error("Gagal membaca progress kuis:", err);
+        localStorage.removeItem(key);
+        return null;
     }
+}
+
+function clearQuizProgress(session, packageId) {
+    if (!session) return;
+
+    const key = getProgressStorageKey(session, packageId);
+    localStorage.removeItem(key);
 }
 
 /* ================================
@@ -42,7 +83,8 @@ async function getActiveSession() {
         const now = Date.now();
 
         return sessions.find(
-            session => new Date(session.expires_at).getTime() > now
+            session =>
+                new Date(session.expires_at).getTime() > now
         ) || null;
     } catch (err) {
         console.error("Gagal mengambil sesi lokal:", err);
@@ -53,82 +95,6 @@ async function getActiveSession() {
 async function getActiveSessionToken() {
     const session = await getActiveSession();
     return session ? session.session_token : null;
-}
-
-/* ================================
-   RESUME
-================================ */
-
-function getProgressKey(session, packageId) {
-    return [
-        session.student_id,
-        session.session_id,
-        packageId
-    ];
-}
-
-async function saveQuizProgress(session) {
-    if (!session || !quizState.attemptId || !quizState.packageId) {
-        return;
-    }
-
-    await ensureProgressTable();
-
-    await db.quiz_progress.put({
-        student_id: session.student_id,
-        session_id: session.session_id,
-        package_id: quizState.packageId,
-        attempt_id: quizState.attemptId,
-        currentIndex: quizState.currentIndex,
-        correctCount: quizState.correctCount,
-        wrongCount: quizState.wrongCount,
-        questionsLength: quizState.questions.length,
-        updated_at: new Date().toISOString()
-    });
-}
-
-async function getQuizProgress(session, packageId, questionsLength) {
-    if (!session) return null;
-
-    await ensureProgressTable();
-
-    try {
-        const progress = await db.quiz_progress.get(
-            getProgressKey(session, packageId)
-        );
-
-        if (!progress) {
-            return null;
-        }
-
-        if (
-            progress.package_id !== packageId ||
-            progress.questionsLength !== questionsLength ||
-            !progress.attempt_id
-        ) {
-            await clearQuizProgress(session, packageId);
-            return null;
-        }
-
-        return progress;
-    } catch (err) {
-        console.error("Gagal membaca progress kuis:", err);
-        return null;
-    }
-}
-
-async function clearQuizProgress(session, packageId) {
-    if (!session) return;
-
-    await ensureProgressTable();
-
-    try {
-        await db.quiz_progress.delete(
-            getProgressKey(session, packageId)
-        );
-    } catch (err) {
-        console.error("Gagal menghapus progress kuis:", err);
-    }
 }
 
 /* ================================
@@ -146,9 +112,7 @@ export async function openQuizPackages(grade) {
     const studentGrade = Number(grade);
 
     showView("view-quiz-packages");
-
-    packageList.innerHTML =
-        `<div class="loading">Memuat paket kuis...</div>`;
+    packageList.innerHTML = `<div class="loading">Memuat paket kuis...</div>`;
 
     try {
         const packages = quizManifest.filter(
@@ -272,7 +236,7 @@ export async function startQuiz(packageId, questionsArray) {
     }
 
     const savedProgress =
-        await getQuizProgress(
+        getQuizProgress(
             session,
             packageId,
             questionsArray.length
@@ -287,13 +251,13 @@ export async function startQuiz(packageId, questionsArray) {
             savedProgress.attempt_id;
 
         quizState.currentIndex =
-            savedProgress.currentIndex;
+            Number(savedProgress.currentIndex) || 0;
 
         quizState.correctCount =
-            savedProgress.correctCount;
+            Number(savedProgress.correctCount) || 0;
 
         quizState.wrongCount =
-            savedProgress.wrongCount;
+            Number(savedProgress.wrongCount) || 0;
     } else {
         quizState.currentIndex = 0;
         quizState.correctCount = 0;
@@ -308,10 +272,8 @@ export async function startQuiz(packageId, questionsArray) {
                 {
                     p_session_token:
                         session.session_token,
-
                     p_package_id:
                         packageId,
-
                     p_total_questions:
                         questionsArray.length
                 }
@@ -321,7 +283,7 @@ export async function startQuiz(packageId, questionsArray) {
 
             quizState.attemptId = attemptId;
 
-            await saveQuizProgress(session);
+            saveQuizProgress(session, 0);
         } catch (err) {
             console.error(
                 "Gagal memulai kuis:",
@@ -340,7 +302,8 @@ export async function startQuiz(packageId, questionsArray) {
         quizState.currentIndex >=
         quizState.questions.length
     ) {
-        quizState.currentIndex = 0;
+        quizState.currentIndex =
+            quizState.questions.length - 1;
     }
 
     renderQuizContainer();
@@ -358,9 +321,7 @@ function renderQuizContainer() {
     const oldQuiz =
         document.getElementById("view-quiz");
 
-    if (oldQuiz) {
-        oldQuiz.remove();
-    }
+    if (oldQuiz) oldQuiz.remove();
 
     const section =
         document.createElement("section");
@@ -422,7 +383,10 @@ function renderQuizContainer() {
                 await getActiveSession();
 
             if (session) {
-                await saveQuizProgress(session);
+                saveQuizProgress(
+                    session,
+                    quizState.currentIndex
+                );
             }
 
             showView("view-quiz-packages");
@@ -451,7 +415,6 @@ function renderQuestion() {
             "Soal tidak ditemukan:",
             quizState.currentIndex
         );
-
         return;
     }
 
@@ -723,7 +686,6 @@ async function handleAnswer(
                     : "💡 Belum tepat."
             }
         </strong>
-
         <span>
             ${
                 questionObj.explanation ||
@@ -765,7 +727,6 @@ async function handleAnswer(
                 p_selected_answer: {
                     selected_index:
                         optionIndex,
-
                     text:
                         selectedOpt.text
                 },
@@ -780,13 +741,15 @@ async function handleAnswer(
 
         if (error) throw error;
 
-        quizState.currentIndex++;
-
-        await saveQuizProgress(
-            session
+        /*
+         * Simpan posisi soal berikutnya.
+         * Jadi kalau siswa keluar setelah menjawab,
+         * saat masuk kembali langsung lanjut ke soal berikutnya.
+         */
+        saveQuizProgress(
+            session,
+            quizState.currentIndex + 1
         );
-
-        quizState.currentIndex--;
     } catch (err) {
         console.error(
             "Gagal menyimpan jawaban ke database:",
@@ -806,8 +769,9 @@ async function handleNextQuestion() {
         quizState.currentIndex <
         quizState.questions.length
     ) {
-        await saveQuizProgress(
-            await getActiveSession()
+        saveQuizProgress(
+            await getActiveSession(),
+            quizState.currentIndex
         );
 
         renderQuestion();
@@ -855,7 +819,7 @@ async function finishQuiz() {
 
         if (error) throw error;
 
-        await clearQuizProgress(
+        clearQuizProgress(
             session,
             quizState.packageId
         );
@@ -884,9 +848,7 @@ async function finishQuiz() {
    RESULT SCREEN
 ================================ */
 
-function renderResultScreen(
-    resultData
-) {
+function renderResultScreen(resultData) {
     const app =
         document.getElementById("app");
 
@@ -895,9 +857,7 @@ function renderResultScreen(
             "view-quiz"
         );
 
-    if (oldQuiz) {
-        oldQuiz.remove();
-    }
+    if (oldQuiz) oldQuiz.remove();
 
     const finalScore =
         resultData.score || 0;
@@ -964,11 +924,7 @@ function renderResultScreen(
                     </div>
                 </div>
 
-                <button
-                    id="btn-result-home"
-                    class="primary-button"
-                    type="button"
-                >
+                <button id="btn-result-home" class="primary-button" type="button">
                     🏠 Kembali ke Beranda
                 </button>
             </div>
@@ -1001,13 +957,8 @@ function showView(id) {
     document
         .querySelectorAll(".view")
         .forEach(view => {
-            view.classList.add(
-                "hidden"
-            );
-
-            view.classList.remove(
-                "active"
-            );
+            view.classList.add("hidden");
+            view.classList.remove("active");
         });
 
     const target =
@@ -1030,24 +981,9 @@ function showView(id) {
 
 function escapeHtml(value) {
     return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
