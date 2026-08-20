@@ -4,6 +4,8 @@ import {
     saveSession,
     deleteSession
 } from "./storage.js";
+import { openQuizPackages } from "./quiz.js";
+
 
 const state = {
     selectedStudent: null,
@@ -153,33 +155,49 @@ function bindEvents() {
 
 
     document
-        .querySelectorAll("[data-activity]")
-        .forEach((button) => {
+    .querySelectorAll("[data-activity]")
+    .forEach((button) => {
 
-            button.addEventListener(
-                "click",
-                () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-                    const activity =
-                        button.dataset.activity;
+                const activity =
+                    button.dataset.activity;
 
-                    console.log(
-                        "Activity selected:",
-                        activity
+
+                if (activity === "quiz") {
+
+                    const grade =
+                        state.selectedStudent?.grade;
+
+
+                    if (!grade) {
+
+                        console.error(
+                            "Grade siswa tidak ditemukan."
+                        );
+
+                        return;
+                    }
+
+
+                    openQuizPackages(
+                        grade
                     );
 
-                    /*
-                     * Nanti:
-                     *
-                     * quiz  → quiz.js
-                     * stem  → stem.js
-                     * timed → timed.js
-                     */
-
+                    return;
                 }
-            );
 
-        });
+
+                console.log(
+                    "Activity selected:",
+                    activity
+                );
+            }
+        );
+
+    });
 }
 
 
