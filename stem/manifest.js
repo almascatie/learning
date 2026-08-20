@@ -1,4 +1,4 @@
-export const timedManifest = [
+export const stemManifest = [
     {
         id: "stem-k2-001",
         grade: 2,
