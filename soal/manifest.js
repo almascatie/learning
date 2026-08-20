@@ -21,17 +21,10 @@ export const quizManifest = [
         file: "./kelas-2/matematika-03.js"
     },
     {
-        id: "k2-matematika-04",
-        grade: 2,
+        id: "k5-matematika-01",
+        grade: 5,
         subject: "Matematika",
-        title: "testtt",
-        file: "./kelas-2/matematika-04.js"
-    },
-        {
-        id: "k2-matematika-05",
-        grade: 2,
-        subject: "Matematika",
-        title: "bicara aja",
-        file: "./kelas-2/matematika-01.js"
+        title: "Matematika Kelas 5 — Paket 1",
+        file: "./kelas-5/matematika-01.js"
     }
 ];
