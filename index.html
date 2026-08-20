@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -9,44 +10,75 @@
 
     <title>Almascatie Family Learning</title>
 
-    <link rel="stylesheet" href="./css/global.css">
-    <link rel="stylesheet" href="./css/student.css">
+    <link
+        rel="stylesheet"
+        href="./css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="./css/student.css"
+    >
 </head>
 
 <body>
 
     <main id="app">
 
+
         <!-- =========================================
              VIEW: PILIH SISWA
         ========================================== -->
+
         <section
             id="view-student-select"
             class="view active"
         >
+
             <div class="student-select">
 
                 <header class="brand">
-                    <div class="brand-mark">🌟</div>
 
-                    <h1>ALMASCATIE</h1>
-                    <p>FAMILY LEARNING</p>
+                    <div class="brand-mark">
+                        🌟
+                    </div>
+
+                    <h1>
+                        ALMASCATIE
+                    </h1>
+
+                    <p>
+                        FAMILY LEARNING
+                    </p>
+
                 </header>
 
+
                 <div class="welcome">
-                    <h2>Siapa kamu?</h2>
-                    <p>Pilih namamu untuk mulai belajar.</p>
+
+                    <h2>
+                        Siapa kamu?
+                    </h2>
+
+                    <p>
+                        Pilih namamu untuk mulai belajar.
+                    </p>
+
                 </div>
+
 
                 <div
                     id="student-list"
                     class="student-list"
                     aria-live="polite"
                 >
+
                     <div class="loading">
                         Memuat...
                     </div>
+
                 </div>
+
 
                 <div
                     id="student-error"
@@ -54,16 +86,20 @@
                 ></div>
 
             </div>
+
         </section>
+
 
 
         <!-- =========================================
              VIEW: PIN
         ========================================== -->
+
         <section
             id="view-pin"
             class="view hidden"
         >
+
             <div class="pin-screen">
 
                 <button
@@ -74,6 +110,7 @@
                     ← Kembali
                 </button>
 
+
                 <div
                     id="selected-student-avatar"
                     class="student-avatar large"
@@ -81,17 +118,23 @@
                     👧
                 </div>
 
+
                 <h2 id="selected-student-name">
                     Nama
                 </h2>
+
 
                 <p id="selected-student-grade">
                     Kelas
                 </p>
 
+
                 <div class="pin-box">
 
-                    <h3>Masukkan PIN</h3>
+                    <h3>
+                        Masukkan PIN
+                    </h3>
+
 
                     <input
                         id="student-pin"
@@ -103,6 +146,7 @@
                         aria-label="PIN siswa"
                     >
 
+
                     <button
                         id="btn-login"
                         class="primary-button"
@@ -110,6 +154,7 @@
                     >
                         Masuk
                     </button>
+
 
                     <div
                         id="pin-error"
@@ -119,19 +164,27 @@
                 </div>
 
             </div>
+
         </section>
+
 
 
         <!-- =========================================
              VIEW: BERANDA SISWA
         ========================================== -->
+
         <section
             id="view-home"
             class="view hidden"
         >
+
             <div class="student-home">
 
+
+                <!-- HOME HEADER -->
+
                 <header class="home-header">
+
 
                     <div class="student-identity">
 
@@ -142,112 +195,233 @@
                             👧
                         </div>
 
+
                         <div>
-                            <p class="greeting">Halo!</p>
+
+                            <p class="greeting">
+                                Halo!
+                            </p>
+
 
                             <h2 id="home-student-name">
                                 Nama
                             </h2>
 
+
                             <span id="home-student-grade">
                                 Kelas
                             </span>
+
                         </div>
 
                     </div>
 
+
+                    <!-- LOGOUT -->
+
+                    <button
+                        id="btn-logout"
+                        class="btn-logout"
+                        type="button"
+                    >
+                        Keluar
+                    </button>
+
                 </header>
 
 
+
+                <!-- ACTIVITY MENU -->
+
                 <section class="activity-menu">
+
+
+                    <!-- KUIS -->
 
                     <button
                         class="activity-card quiz"
                         data-activity="quiz"
                         type="button"
                     >
-                        <span class="activity-icon">🎯</span>
+
+                        <span class="activity-icon">
+                            🎯
+                        </span>
+
 
                         <span class="activity-content">
-                            <strong>Kuis</strong>
+
+                            <strong>
+                                Kuis
+                            </strong>
+
                             <small>
                                 Belajar dan uji pemahaman
                             </small>
+
                         </span>
+
                     </button>
 
+
+
+                    <!-- STEM -->
 
                     <button
                         class="activity-card stem"
                         data-activity="stem"
                         type="button"
                     >
-                        <span class="activity-icon">🔬</span>
+
+                        <span class="activity-icon">
+                            🔬
+                        </span>
+
 
                         <span class="activity-content">
-                            <strong>STEM</strong>
+
+                            <strong>
+                                STEM
+                            </strong>
+
                             <small>
                                 Eksplorasi dan permainan
                             </small>
+
                         </span>
+
                     </button>
 
+
+
+                    <!-- TANTANGAN WAKTU -->
 
                     <button
                         class="activity-card timed"
                         data-activity="timed"
                         type="button"
                     >
-                        <span class="activity-icon">⏱️</span>
+
+                        <span class="activity-icon">
+                            ⏱️
+                        </span>
+
 
                         <span class="activity-content">
-                            <strong>Tantangan Waktu</strong>
+
+                            <strong>
+                                Tantangan Waktu
+                            </strong>
+
                             <small>
                                 Tantangan dengan batas waktu
                             </small>
+
                         </span>
+
                     </button>
+
 
                 </section>
 
             </div>
+
         </section>
+
+
+
         <!-- =========================================
              VIEW: PILIH PAKET KUIS
         ========================================== -->
-        <section id="view-quiz-packages" class="view hidden">
+
+        <section
+            id="view-quiz-packages"
+            class="view hidden"
+        >
+
             <div class="student-home-container">
+
+
                 <header class="home-header">
-                    <button id="btn-back-home" class="back-button" type="button">← Kembali ke Beranda</button>
-                    <h2 style="margin-top: 12px;">Pilih Paket Kuis 🎯</h2>
-                    <p style="color: var(--muted); margin: 0;">Pilih salah satu paket untuk mulai mengerjakan soal.</p>
+
+                    <button
+                        id="btn-back-home"
+                        class="back-button"
+                        type="button"
+                    >
+                        ← Kembali ke Beranda
+                    </button>
+
+
+                    <h2 style="margin-top: 12px;">
+                        Pilih Paket Kuis 🎯
+                    </h2>
+
+
+                    <p
+                        style="
+                            color: var(--muted);
+                            margin: 0;
+                        "
+                    >
+                        Pilih salah satu paket untuk
+                        mulai mengerjakan soal.
+                    </p>
+
                 </header>
 
-                <div id="package-list" class="activity-menu" style="margin-top: 20px;">
-                    <div class="loading">Memuat paket soal...</div>
+
+
+                <div
+                    id="package-list"
+                    class="activity-menu"
+                    style="margin-top: 20px;"
+                >
+
+                    <div class="loading">
+                        Memuat paket soal...
+                    </div>
+
                 </div>
+
             </div>
+
         </section>
-<button
-    type="button"
-    id="btn-logout"
-    class="btn-logout"
->
-    Keluar
-</button>
+
+
     </main>
 
 
-    <!-- Supabase -->
+
+    <!-- =========================================
+         DEXIE
+    ========================================== -->
+
     <script
-    src="https://cdn.jsdelivr.net/npm/dexie@4.2.0/dist/dexie.min.js">
-</script>
-    
+        src="https://cdn.jsdelivr.net/npm/dexie@4.2.0/dist/dexie.min.js"
+    ></script>
+
+
+
+    <!-- =========================================
+         SUPABASE
+    ========================================== -->
+
     <script
         src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
 
-    <script type="module" src="./js/app.js"></script>
+
+
+    <!-- =========================================
+         APPLICATION
+    ========================================== -->
+
+    <script
+        type="module"
+        src="./js/app.js"
+    ></script>
+
 
 </body>
 </html>
