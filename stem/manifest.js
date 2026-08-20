@@ -5,6 +5,5 @@ export const timedManifest = [
         title: "stem 1 gempa",
         description: "tugas gempa",
         icon: "⏱️",
-        file: "./kelas-2/timed-001.js"
     }
 ];
