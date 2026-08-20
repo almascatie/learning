@@ -26,5 +26,19 @@ export const quizManifest = [
         subject: "Matematika",
         title: "Matematika Kelas 5 — Paket 1",
         file: "./kelas-5/matematika-01.js"
+    },
+    {
+        id: "k5-matematika-02",
+        grade: 5,
+        subject: "Matematika",
+        title: "Matematika Kelas 5 — Paket 2",
+        file: "./kelas-5/matematika-02.js"
+    },
+    {
+        id: "k5-matematika-03",
+        grade: 5,
+        subject: "Matematika",
+        title: "Matematika Kelas 5 — Paket 3",
+        file: "./kelas-5/matematika-03.js"
     }
 ];
