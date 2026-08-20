@@ -50,15 +50,28 @@ export async function saveStudentAnswer(
 }
 
 export async function completeStudentAttempt(sessionToken, attemptId) {
-    const { data, error } = await supabase.rpc(
-        "complete_student_attempt",
-        {
-            p_session_token: sessionToken,
-            p_attempt_id: attemptId
-        }
-    );
+    console.log("Menyelesaikan attempt:", {
+        sessionToken: sessionToken ? "[ada]" : "[kosong]",
+        attemptId
+    });
 
-    if (error) throw error;
+    const { data, error } = await supabase.rpc("complete_student_attempt", {
+        p_session_token: sessionToken,
+        p_attempt_id: attemptId
+    });
+
+    if (error) {
+        console.error("RPC complete_student_attempt ERROR:", {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+        });
+
+        throw error;
+    }
+
+    console.log("RPC complete_student_attempt berhasil:", data);
 
     return Array.isArray(data) ? data[0] : data;
 }
