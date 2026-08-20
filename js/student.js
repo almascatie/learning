@@ -1,6 +1,6 @@
 import { supabase } from "./supabase.js";
 import { db, saveSession, deleteSession } from "./storage.js";
-import { openQuizPackages } from "./quis.js";
+import { openQuizPackages } from "./quiz/quiz.js";
 
 const state = {
     selectedStudent: null,
