@@ -1,20 +1,20 @@
 import { supabase } from "./supabase.js";
 import {
     db,
-    saveSession
+    saveSession,
     deleteSession
 } from "./storage.js";
 
 const state = {
-    selectedStudent: null
-        sessionId: null
-
+    selectedStudent: null,
+    sessionId: null
 };
 
 export async function initStudentApp() {
     bindEvents();
 
     const recovered = await recoverSession();
+
     if (recovered) {
         return;
     }
@@ -29,25 +29,38 @@ export async function initStudentApp() {
 ================================ */
 
 async function recoverSession() {
+
     try {
-        const sessions = await db.sessions.toArray();
+
+        const sessions =
+            await db.sessions.toArray();
+
         if (!sessions.length) {
             return false;
         }
 
         const now = Date.now();
-        const session = sessions.find(
-            item => new Date(item.expires_at).getTime() > now
-        );
+
+        const session =
+            sessions.find(
+                item =>
+                    new Date(
+                        item.expires_at
+                    ).getTime() > now
+            );
 
         if (!session) {
             return false;
         }
 
-        const { data, error } = await supabase.rpc(
+        const {
+            data,
+            error
+        } = await supabase.rpc(
             "validate_student_session",
             {
-                p_session_token: session.session_token
+                p_session_token:
+                    session.session_token
             }
         );
 
@@ -55,15 +68,35 @@ async function recoverSession() {
             return false;
         }
 
-        // Sesi valid, langsung masuk ke beranda
-        document.getElementById("home-avatar").textContent = session.avatar || "👧";
-        document.getElementById("home-student-name").textContent = session.student_name;
-        document.getElementById("home-student-grade").textContent = `Kelas ${session.grade}`;
+        state.sessionId =
+            session.session_id;
+
+        document
+            .getElementById("home-avatar")
+            .textContent =
+                session.avatar || "👧";
+
+        document
+            .getElementById("home-student-name")
+            .textContent =
+                session.student_name;
+
+        document
+            .getElementById("home-student-grade")
+            .textContent =
+                `Kelas ${session.grade}`;
 
         showView("view-home");
+
         return true;
+
     } catch (err) {
-        console.error("Session recovery error:", err);
+
+        console.error(
+            "Session recovery error:",
+            err
+        );
+
         return false;
     }
 }
@@ -74,39 +107,78 @@ async function recoverSession() {
 ================================ */
 
 function bindEvents() {
+
     document
         .getElementById("btn-back-student")
         .addEventListener("click", () => {
+
             state.selectedStudent = null;
-            document.getElementById("student-pin").value = "";
+
+            document
+                .getElementById("student-pin")
+                .value = "";
+
             showView("view-student-select");
         });
 
+
     document
         .getElementById("btn-login")
-        .addEventListener("click", loginStudent);
+        .addEventListener(
+            "click",
+            loginStudent
+        );
+
+
+    document
+        .getElementById("btn-logout")
+        .addEventListener(
+            "click",
+            logoutStudent
+        );
+
 
     document
         .getElementById("student-pin")
-        .addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                loginStudent();
+        .addEventListener(
+            "keydown",
+            (event) => {
+
+                if (event.key === "Enter") {
+                    loginStudent();
+                }
+
             }
-        });
+        );
+
 
     document
         .querySelectorAll("[data-activity]")
         .forEach((button) => {
-            button.addEventListener("click", () => {
-                const activity = button.dataset.activity;
-                console.log("Activity selected:", activity);
-                /*
-                 * Nanti:
-                 * quiz  → quiz.js
-                 * stem  → stem.js
-                 * timed → timed.js
-                 */
-            });
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const activity =
+                        button.dataset.activity;
+
+                    console.log(
+                        "Activity selected:",
+                        activity
+                    );
+
+                    /*
+                     * Nanti:
+                     *
+                     * quiz  → quiz.js
+                     * stem  → stem.js
+                     * timed → timed.js
+                     */
+
+                }
+            );
+
         });
 }
 
@@ -116,11 +188,23 @@ function bindEvents() {
 ================================ */
 
 async function loadStudents() {
-    const container = document.getElementById("student-list");
-    const error = document.getElementById("student-error");
+
+    const container =
+        document.getElementById(
+            "student-list"
+        );
+
+    const error =
+        document.getElementById(
+            "student-error"
+        );
 
     try {
-        const { data, error: rpcError } = await supabase.rpc(
+
+        const {
+            data,
+            error: rpcError
+        } = await supabase.rpc(
             "get_active_students"
         );
 
@@ -128,13 +212,25 @@ async function loadStudents() {
             throw rpcError;
         }
 
-        renderStudents(data || []);
+        renderStudents(
+            data || []
+        );
 
     } catch (err) {
-        console.error("get_active_students:", err);
+
+        console.error(
+            "get_active_students:",
+            err
+        );
+
         container.innerHTML = "";
-        error.textContent = "Data siswa tidak dapat dimuat.";
-        error.classList.remove("hidden");
+
+        error.textContent =
+            "Data siswa tidak dapat dimuat.";
+
+        error.classList.remove(
+            "hidden"
+        );
     }
 }
 
@@ -144,37 +240,59 @@ async function loadStudents() {
 ================================ */
 
 function renderStudents(students) {
-    const container = document.getElementById("student-list");
+
+    const container =
+        document.getElementById(
+            "student-list"
+        );
+
     container.innerHTML = "";
 
     if (!students.length) {
+
         container.innerHTML = `
             <div class="loading">
                 Belum ada data siswa.
             </div>
         `;
+
         return;
     }
 
+
     students.forEach((student) => {
-        const button = document.createElement("button");
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
         button.type = "button";
-        button.className = "student-card";
+
+        button.className =
+            "student-card";
 
         button.innerHTML = `
             <div class="student-avatar">
                 ${student.avatar || "👧"}
             </div>
+
             <strong>
                 ${escapeHtml(student.name)}
             </strong>
+
             <small>
                 Kelas ${student.grade}
             </small>
         `;
 
-        button.addEventListener("click", () => selectStudent(student));
+        button.addEventListener(
+            "click",
+            () => selectStudent(student)
+        );
+
         container.appendChild(button);
+
     });
 }
 
@@ -184,18 +302,57 @@ function renderStudents(students) {
 ================================ */
 
 function selectStudent(student) {
-    state.selectedStudent = student;
 
-    document.getElementById("selected-student-avatar").textContent = student.avatar || "👧";
-    document.getElementById("selected-student-name").textContent = student.name;
-    document.getElementById("selected-student-grade").textContent = `Kelas ${student.grade}`;
-    document.getElementById("student-pin").value = "";
-    document.getElementById("pin-error").classList.add("hidden");
+    state.selectedStudent =
+        student;
 
-    showView("view-pin");
+    document
+        .getElementById(
+            "selected-student-avatar"
+        )
+        .textContent =
+            student.avatar || "👧";
+
+    document
+        .getElementById(
+            "selected-student-name"
+        )
+        .textContent =
+            student.name;
+
+    document
+        .getElementById(
+            "selected-student-grade"
+        )
+        .textContent =
+            `Kelas ${student.grade}`;
+
+    document
+        .getElementById(
+            "student-pin"
+        )
+        .value = "";
+
+    document
+        .getElementById(
+            "pin-error"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+    showView(
+        "view-pin"
+    );
 
     setTimeout(() => {
-        document.getElementById("student-pin").focus();
+
+        document
+            .getElementById(
+                "student-pin"
+            )
+            .focus();
+
     }, 100);
 }
 
@@ -205,74 +362,262 @@ function selectStudent(student) {
 ================================ */
 
 async function loginStudent() {
+
     if (!state.selectedStudent) {
         return;
     }
 
-    const pinInput = document.getElementById("student-pin");
-    const error = document.getElementById("pin-error");
-    const pin = pinInput.value.trim();
+    const pinInput =
+        document.getElementById(
+            "student-pin"
+        );
+
+    const error =
+        document.getElementById(
+            "pin-error"
+        );
+
+    const pin =
+        pinInput.value.trim();
+
 
     if (!/^\d{4}$/.test(pin)) {
-        error.textContent = "PIN harus terdiri dari 4 angka.";
-        error.classList.remove("hidden");
+
+        error.textContent =
+            "PIN harus terdiri dari 4 angka.";
+
+        error.classList.remove(
+            "hidden"
+        );
+
         return;
     }
 
-    const button = document.getElementById("btn-login");
+
+    const button =
+        document.getElementById(
+            "btn-login"
+        );
+
     button.disabled = true;
-    error.classList.add("hidden");
+
+    error.classList.add(
+        "hidden"
+    );
+
 
     try {
-        const { data, error: rpcError } = await supabase.rpc(
+
+        const {
+            data,
+            error: rpcError
+        } = await supabase.rpc(
             "student_login",
             {
-                p_student_id: state.selectedStudent.id,
-                p_pin: pin
+                p_student_id:
+                    state.selectedStudent.id,
+
+                p_pin:
+                    pin
             }
         );
+
 
         if (rpcError) {
             throw rpcError;
         }
 
-        const result = Array.isArray(data) ? data[0] : data;
+
+        const result =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
 
         if (!result) {
-            showLoginError("INVALID_PIN");
+
+            showLoginError(
+                "INVALID_PIN"
+            );
+
             return;
         }
 
-        // Simpan sesi ke IndexedDB (menggantikan localStorage)
-        await saveSession(result);
 
-        document.getElementById("home-avatar").textContent =
-            result.avatar || state.selectedStudent.avatar || "👧";
+        /*
+         * Simpan session ke IndexedDB.
+         */
 
-        document.getElementById("home-student-name").textContent =
-            result.student_name || state.selectedStudent.name;
+        await saveSession(
+            result
+        );
 
-        document.getElementById("home-student-grade").textContent =
-            `Kelas ${result.grade || state.selectedStudent.grade}`;
 
-        showView("view-home");
+        /*
+         * Simpan session_id
+         * untuk state aplikasi.
+         */
+
+        state.sessionId =
+            result.session_id;
+
+
+        document
+            .getElementById(
+                "home-avatar"
+            )
+            .textContent =
+                result.avatar ||
+                state.selectedStudent.avatar ||
+                "👧";
+
+
+        document
+            .getElementById(
+                "home-student-name"
+            )
+            .textContent =
+                result.student_name ||
+                state.selectedStudent.name;
+
+
+        document
+            .getElementById(
+                "home-student-grade"
+            )
+            .textContent =
+                `Kelas ${
+                    result.grade ||
+                    state.selectedStudent.grade
+                }`;
+
+
+        showView(
+            "view-home"
+        );
+
 
     } catch (err) {
-        console.error("Login error:", err);
 
-        let errorCode = "INVALID_PIN";
-        const message = err.message || "";
+        console.error(
+            "Login error:",
+            err
+        );
 
-        if (message.includes("PIN_TEMPORARILY_LOCKED")) {
-            errorCode = "PIN_TEMPORARILY_LOCKED";
-        } else if (message.includes("STUDENT_NOT_FOUND")) {
-            errorCode = "STUDENT_NOT_FOUND";
+        let errorCode =
+            "INVALID_PIN";
+
+        const message =
+            err.message || "";
+
+
+        if (
+            message.includes(
+                "PIN_TEMPORARILY_LOCKED"
+            )
+        ) {
+
+            errorCode =
+                "PIN_TEMPORARILY_LOCKED";
+
+        } else if (
+            message.includes(
+                "STUDENT_NOT_FOUND"
+            )
+        ) {
+
+            errorCode =
+                "STUDENT_NOT_FOUND";
+
+        } else if (
+            message.includes(
+                "STUDENT_INACTIVE"
+            )
+        ) {
+
+            errorCode =
+                "STUDENT_INACTIVE";
         }
 
-        showLoginError(errorCode);
+
+        showLoginError(
+            errorCode
+        );
+
 
     } finally {
+
         button.disabled = false;
+
+    }
+}
+
+
+/* ================================
+   LOGOUT
+================================ */
+
+async function logoutStudent() {
+
+    try {
+
+        /*
+         * Hapus session aktif dari
+         * IndexedDB.
+         */
+
+        if (state.sessionId) {
+
+            await deleteSession(
+                state.sessionId
+            );
+
+        }
+
+        /*
+         * Bersihkan state aplikasi.
+         */
+
+        state.selectedStudent =
+            null;
+
+        state.sessionId =
+            null;
+
+
+        /*
+         * Bersihkan PIN.
+         */
+
+        document
+            .getElementById(
+                "student-pin"
+            )
+            .value = "";
+
+
+        /*
+         * Kembali ke pemilihan siswa.
+         */
+
+        showView(
+            "view-student-select"
+        );
+
+        /*
+         * Muat ulang daftar siswa.
+         */
+
+        await loadStudents();
+
+
+    } catch (err) {
+
+        console.error(
+            "Logout error:",
+            err
+        );
+
     }
 }
 
@@ -282,17 +627,36 @@ async function loginStudent() {
 ================================ */
 
 function showLoginError(code) {
-    const error = document.getElementById("pin-error");
+
+    const error =
+        document.getElementById(
+            "pin-error"
+        );
 
     const messages = {
-        INVALID_PIN: "PIN salah. Coba lagi.",
-        PIN_TEMPORARILY_LOCKED: "PIN terkunci sementara. Coba lagi nanti.",
-        STUDENT_NOT_FOUND: "Siswa tidak ditemukan.",
-        STUDENT_INACTIVE: "Akun siswa sedang tidak aktif."
+
+        INVALID_PIN:
+            "PIN salah. Coba lagi.",
+
+        PIN_TEMPORARILY_LOCKED:
+            "PIN terkunci sementara. Coba lagi nanti.",
+
+        STUDENT_NOT_FOUND:
+            "Siswa tidak ditemukan.",
+
+        STUDENT_INACTIVE:
+            "Akun siswa sedang tidak aktif."
+
     };
 
-    error.textContent = messages[code] || "Tidak dapat masuk.";
-    error.classList.remove("hidden");
+
+    error.textContent =
+        messages[code] ||
+        "Tidak dapat masuk.";
+
+    error.classList.remove(
+        "hidden"
+    );
 }
 
 
@@ -301,15 +665,37 @@ function showLoginError(code) {
 ================================ */
 
 function showView(id) {
-    document.querySelectorAll(".view").forEach((view) => {
-        view.classList.add("hidden");
-        view.classList.remove("active");
-    });
 
-    const target = document.getElementById(id);
+    document
+        .querySelectorAll(".view")
+        .forEach((view) => {
+
+            view.classList.add(
+                "hidden"
+            );
+
+            view.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    const target =
+        document.getElementById(
+            id
+        );
+
     if (target) {
-        target.classList.remove("hidden");
-        target.classList.add("active");
+
+        target.classList.remove(
+            "hidden"
+        );
+
+        target.classList.add(
+            "active"
+        );
+
     }
 }
 
@@ -319,12 +705,26 @@ function showView(id) {
 ================================ */
 
 function escapeHtml(value) {
+
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
-
-
