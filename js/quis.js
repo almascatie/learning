@@ -13,13 +13,37 @@ let quizState = {
 };
 
 /* ================================
+   QUIZ PROGRESS STORAGE
+================================ */
+
+let progressTableReady = false;
+
+async function ensureProgressTable() {
+    if (progressTableReady) return;
+
+    try {
+        db.version(2).stores({
+            quiz_progress: "[student_id+session_id+package_id], student_id, session_id, package_id, attempt_id"
+        });
+
+        progressTableReady = true;
+    } catch (err) {
+        console.error("Gagal menyiapkan tabel progress kuis:", err);
+    }
+}
+
+/* ================================
    SESSION
 ================================ */
+
 async function getActiveSession() {
     try {
         const sessions = await db.sessions.toArray();
         const now = Date.now();
-        return sessions.find(session => new Date(session.expires_at).getTime() > now) || null;
+
+        return sessions.find(
+            session => new Date(session.expires_at).getTime() > now
+        ) || null;
     } catch (err) {
         console.error("Gagal mengambil sesi lokal:", err);
         return null;
@@ -34,60 +58,83 @@ async function getActiveSessionToken() {
 /* ================================
    RESUME
 ================================ */
-function getResumeKey(session, packageId) {
-    return `quiz-progress-${session.student_id}-${packageId}`;
+
+function getProgressKey(session, packageId) {
+    return [
+        session.student_id,
+        session.session_id,
+        packageId
+    ];
 }
 
-function saveQuizProgress(session, questionsLength) {
-    if (!session || !quizState.attemptId || !quizState.packageId) return;
+async function saveQuizProgress(session) {
+    if (!session || !quizState.attemptId || !quizState.packageId) {
+        return;
+    }
 
-    const key = getResumeKey(session, quizState.packageId);
+    await ensureProgressTable();
 
-    localStorage.setItem(key, JSON.stringify({
-        attemptId: quizState.attemptId,
-        packageId: quizState.packageId,
+    await db.quiz_progress.put({
+        student_id: session.student_id,
+        session_id: session.session_id,
+        package_id: quizState.packageId,
+        attempt_id: quizState.attemptId,
         currentIndex: quizState.currentIndex,
         correctCount: quizState.correctCount,
         wrongCount: quizState.wrongCount,
-        questionsLength
-    }));
+        questionsLength: quizState.questions.length,
+        updated_at: new Date().toISOString()
+    });
 }
 
-function getQuizProgress(session, packageId, questionsLength) {
+async function getQuizProgress(session, packageId, questionsLength) {
     if (!session) return null;
 
-    const key = getResumeKey(session, packageId);
-    const saved = localStorage.getItem(key);
-
-    if (!saved) return null;
+    await ensureProgressTable();
 
     try {
-        const progress = JSON.parse(saved);
+        const progress = await db.quiz_progress.get(
+            getProgressKey(session, packageId)
+        );
+
+        if (!progress) {
+            return null;
+        }
 
         if (
-            progress.packageId !== packageId ||
+            progress.package_id !== packageId ||
             progress.questionsLength !== questionsLength ||
-            !progress.attemptId
+            !progress.attempt_id
         ) {
-            localStorage.removeItem(key);
+            await clearQuizProgress(session, packageId);
             return null;
         }
 
         return progress;
-    } catch {
-        localStorage.removeItem(key);
+    } catch (err) {
+        console.error("Gagal membaca progress kuis:", err);
         return null;
     }
 }
 
-function clearQuizProgress(session, packageId) {
+async function clearQuizProgress(session, packageId) {
     if (!session) return;
-    localStorage.removeItem(getResumeKey(session, packageId));
+
+    await ensureProgressTable();
+
+    try {
+        await db.quiz_progress.delete(
+            getProgressKey(session, packageId)
+        );
+    } catch (err) {
+        console.error("Gagal menghapus progress kuis:", err);
+    }
 }
 
 /* ================================
    OPEN QUIZ PACKAGE LIST
 ================================ */
+
 export async function openQuizPackages(grade) {
     const packageList = document.getElementById("package-list");
 
@@ -97,12 +144,16 @@ export async function openQuizPackages(grade) {
     }
 
     const studentGrade = Number(grade);
+
     showView("view-quiz-packages");
 
-    packageList.innerHTML = `<div class="loading">Memuat paket kuis...</div>`;
+    packageList.innerHTML =
+        `<div class="loading">Memuat paket kuis...</div>`;
 
     try {
-        const packages = quizManifest.filter(item => Number(item.grade) === studentGrade);
+        const packages = quizManifest.filter(
+            item => Number(item.grade) === studentGrade
+        );
 
         if (!packages.length) {
             packageList.innerHTML = `
@@ -116,6 +167,7 @@ export async function openQuizPackages(grade) {
         renderQuizPackages(packages);
     } catch (err) {
         console.error("Gagal memuat manifest kuis:", err);
+
         packageList.innerHTML = `
             <div class="message error">
                 Paket kuis tidak dapat dimuat.
@@ -127,12 +179,15 @@ export async function openQuizPackages(grade) {
 /* ================================
    RENDER QUIZ PACKAGES
 ================================ */
+
 function renderQuizPackages(packages) {
     const packageList = document.getElementById("package-list");
+
     packageList.innerHTML = "";
 
     packages.forEach(quizPackage => {
         const button = document.createElement("button");
+
         button.type = "button";
         button.className = "activity-card quiz";
 
@@ -144,7 +199,11 @@ function renderQuizPackages(packages) {
             </span>
         `;
 
-        button.addEventListener("click", () => loadQuizPackage(quizPackage));
+        button.addEventListener(
+            "click",
+            () => loadQuizPackage(quizPackage)
+        );
+
         packageList.appendChild(button);
     });
 }
@@ -152,24 +211,44 @@ function renderQuizPackages(packages) {
 /* ================================
    LOAD QUIZ PACKAGE
 ================================ */
+
 async function loadQuizPackage(quizPackage) {
     try {
-        const manifestUrl = new URL("../soal/manifest.js", import.meta.url);
-        const packageUrl = new URL(quizPackage.file, manifestUrl);
-        const module = await import(packageUrl.href);
-        const packageData = module.default;
+        const manifestUrl =
+            new URL("../soal/manifest.js", import.meta.url);
+
+        const packageUrl =
+            new URL(quizPackage.file, manifestUrl);
+
+        const module =
+            await import(packageUrl.href);
+
+        const packageData =
+            module.default;
 
         if (!packageData) {
-            throw new Error("File paket tidak memiliki export default.");
+            throw new Error(
+                "File paket tidak memiliki export default."
+            );
         }
 
         if (!Array.isArray(packageData.questions)) {
-            throw new Error("Paket tidak memiliki array questions.");
+            throw new Error(
+                "Paket tidak memiliki array questions."
+            );
         }
 
-        await startQuiz(quizPackage.id, packageData.questions);
+        await startQuiz(
+            quizPackage.id,
+            packageData.questions
+        );
     } catch (err) {
-        console.error("Gagal memuat paket kuis:", quizPackage, err);
+        console.error(
+            "Gagal memuat paket kuis:",
+            quizPackage,
+            err
+        );
+
         alert("Paket kuis tidak dapat dibuka.");
     }
 }
@@ -177,6 +256,7 @@ async function loadQuizPackage(quizPackage) {
 /* ================================
    START / RESUME QUIZ
 ================================ */
+
 export async function startQuiz(packageId, questionsArray) {
     if (!questionsArray || questionsArray.length === 0) {
         alert("Paket soal kosong atau belum tersedia.");
@@ -191,44 +271,76 @@ export async function startQuiz(packageId, questionsArray) {
         return;
     }
 
-    const savedProgress = getQuizProgress(
-        session,
-        packageId,
-        questionsArray.length
-    );
+    const savedProgress =
+        await getQuizProgress(
+            session,
+            packageId,
+            questionsArray.length
+        );
 
     quizState.packageId = packageId;
     quizState.questions = questionsArray;
     quizState.isAnswered = false;
 
     if (savedProgress) {
-        quizState.attemptId = savedProgress.attemptId;
-        quizState.currentIndex = savedProgress.currentIndex;
-        quizState.correctCount = savedProgress.correctCount;
-        quizState.wrongCount = savedProgress.wrongCount;
+        quizState.attemptId =
+            savedProgress.attempt_id;
+
+        quizState.currentIndex =
+            savedProgress.currentIndex;
+
+        quizState.correctCount =
+            savedProgress.correctCount;
+
+        quizState.wrongCount =
+            savedProgress.wrongCount;
     } else {
         quizState.currentIndex = 0;
         quizState.correctCount = 0;
         quizState.wrongCount = 0;
 
         try {
-            const { data: attemptId, error } = await supabase.rpc(
+            const {
+                data: attemptId,
+                error
+            } = await supabase.rpc(
                 "start_student_attempt",
                 {
-                    p_session_token: session.session_token,
-                    p_package_id: packageId,
-                    p_total_questions: questionsArray.length
+                    p_session_token:
+                        session.session_token,
+
+                    p_package_id:
+                        packageId,
+
+                    p_total_questions:
+                        questionsArray.length
                 }
             );
 
             if (error) throw error;
 
             quizState.attemptId = attemptId;
+
+            await saveQuizProgress(session);
         } catch (err) {
-            console.error("Gagal memulai kuis:", err);
-            alert("Terjadi kesalahan saat menyiapkan kuis.");
+            console.error(
+                "Gagal memulai kuis:",
+                err
+            );
+
+            alert(
+                "Terjadi kesalahan saat menyiapkan kuis."
+            );
+
             return;
         }
+    }
+
+    if (
+        quizState.currentIndex >=
+        quizState.questions.length
+    ) {
+        quizState.currentIndex = 0;
     }
 
     renderQuizContainer();
@@ -238,20 +350,31 @@ export async function startQuiz(packageId, questionsArray) {
 /* ================================
    RENDER QUIZ CONTAINER
 ================================ */
+
 function renderQuizContainer() {
-    const app = document.getElementById("app");
-    const oldQuiz = document.getElementById("view-quiz");
+    const app =
+        document.getElementById("app");
 
-    if (oldQuiz) oldQuiz.remove();
+    const oldQuiz =
+        document.getElementById("view-quiz");
 
-    const section = document.createElement("section");
+    if (oldQuiz) {
+        oldQuiz.remove();
+    }
+
+    const section =
+        document.createElement("section");
+
     section.id = "view-quiz";
     section.className = "view hidden";
 
     section.innerHTML = `
         <div class="quiz-container" style="max-width:600px;margin:0 auto;padding:24px 16px;">
             <header class="quiz-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <button id="btn-quit-quiz" class="back-button" type="button">← Keluar</button>
+                <button id="btn-quit-quiz" class="back-button" type="button">
+                    ← Keluar
+                </button>
+
                 <div class="quiz-progress-info">
                     <span id="quiz-counter" style="font-weight:700;color:var(--muted);">
                         Soal 1 / ${quizState.questions.length}
@@ -282,77 +405,133 @@ function renderQuizContainer() {
     `;
 
     app.appendChild(section);
+
     showView("view-quiz");
 
-    document.getElementById("btn-quit-quiz").addEventListener("click", () => {
-        if (confirm("Keluar dari kuis? Progress saat ini akan disimpan.")) {
-            showView("view-quiz-packages");
-        }
-    });
+    document
+        .getElementById("btn-quit-quiz")
+        .addEventListener("click", async () => {
+            const confirmed =
+                confirm(
+                    "Keluar dari kuis? Progress saat ini akan disimpan."
+                );
 
-    document.getElementById("btn-next-question").addEventListener(
-        "click",
-        handleNextQuestion
-    );
+            if (!confirmed) return;
+
+            const session =
+                await getActiveSession();
+
+            if (session) {
+                await saveQuizProgress(session);
+            }
+
+            showView("view-quiz-packages");
+        });
+
+    document
+        .getElementById("btn-next-question")
+        .addEventListener(
+            "click",
+            handleNextQuestion
+        );
 }
 
 /* ================================
    RENDER QUESTION
 ================================ */
+
 function renderQuestion() {
-    const q = quizState.questions[quizState.currentIndex];
+    const q =
+        quizState.questions[
+            quizState.currentIndex
+        ];
 
     if (!q) {
-        console.error("Soal tidak ditemukan:", quizState.currentIndex);
+        console.error(
+            "Soal tidak ditemukan:",
+            quizState.currentIndex
+        );
+
         return;
     }
 
     quizState.isAnswered = false;
 
-    document.getElementById("quiz-counter").textContent =
+    document
+        .getElementById("quiz-counter")
+        .textContent =
         `Soal ${quizState.currentIndex + 1} / ${quizState.questions.length}`;
 
     const progressPct =
-        (quizState.currentIndex / quizState.questions.length) * 100;
+        (quizState.currentIndex /
+            quizState.questions.length) *
+        100;
 
-    document.getElementById("quiz-progress-fill").style.width =
+    document
+        .getElementById("quiz-progress-fill")
+        .style.width =
         `${progressPct}%`;
 
-    document.getElementById("quiz-question-text").textContent = q.question;
+    document
+        .getElementById("quiz-question-text")
+        .textContent =
+        q.question;
 
-    const visualEl = document.getElementById("quiz-visual");
+    const visualEl =
+        document.getElementById("quiz-visual");
+
     visualEl.innerHTML = "";
 
     if (q.image) {
-        const image = document.createElement("img");
+        const image =
+            document.createElement("img");
+
         image.src = q.image;
-        image.alt = q.question || "Gambar soal";
+        image.alt =
+            q.question || "Gambar soal";
+
         image.style.cssText =
             "display:block;max-width:100%;max-height:180px;margin:0 auto;border-radius:16px;object-fit:contain;";
+
         visualEl.appendChild(image);
     } else if (q.visual) {
-        const visual = document.createElement("div");
-        visual.textContent = q.visual;
-        visual.style.cssText = "font-size:64px;line-height:1.2;";
+        const visual =
+            document.createElement("div");
+
+        visual.textContent =
+            q.visual;
+
+        visual.style.cssText =
+            "font-size:64px;line-height:1.2;";
+
         visualEl.appendChild(visual);
     }
 
-    const optionsEl = document.getElementById("quiz-options");
+    const optionsEl =
+        document.getElementById("quiz-options");
+
     optionsEl.innerHTML = "";
 
-    if (!Array.isArray(q.options) || q.options.length === 0) {
+    if (
+        !Array.isArray(q.options) ||
+        q.options.length === 0
+    ) {
         optionsEl.innerHTML = `
             <div class="message error">
                 Pilihan jawaban tidak tersedia.
             </div>
         `;
+
         return;
     }
 
-    const letters = ["A", "B", "C", "D", "E", "F"];
+    const letters =
+        ["A", "B", "C", "D", "E", "F"];
 
     q.options.forEach((opt, idx) => {
-        const btn = document.createElement("button");
+        const btn =
+            document.createElement("button");
+
         btn.type = "button";
         btn.className = "option-card";
 
@@ -372,8 +551,13 @@ function renderQuestion() {
             transition:all .2s;
         `;
 
-        const letter = document.createElement("span");
-        letter.textContent = letters[idx] || String(idx + 1);
+        const letter =
+            document.createElement("span");
+
+        letter.textContent =
+            letters[idx] ||
+            String(idx + 1);
+
         letter.style.cssText = `
             display:grid;
             place-items:center;
@@ -386,42 +570,73 @@ function renderQuestion() {
             font-weight:800;
         `;
 
-        const text = document.createElement("span");
-        text.textContent = opt.text;
+        const text =
+            document.createElement("span");
+
+        text.textContent =
+            opt.text;
 
         btn.appendChild(letter);
         btn.appendChild(text);
 
-        btn.addEventListener("click", () => {
-            handleAnswer(idx, opt, q);
-        });
+        btn.addEventListener(
+            "click",
+            () => handleAnswer(
+                idx,
+                opt,
+                q
+            )
+        );
 
         optionsEl.appendChild(btn);
     });
 
-    document.getElementById("quiz-feedback").classList.add("hidden");
-    document.getElementById("btn-next-question").classList.add("hidden");
+    document
+        .getElementById("quiz-feedback")
+        .classList.add("hidden");
+
+    document
+        .getElementById("btn-next-question")
+        .classList.add("hidden");
 }
 
 /* ================================
    HANDLE ANSWER
 ================================ */
-async function handleAnswer(optionIndex, selectedOpt, questionObj) {
+
+async function handleAnswer(
+    optionIndex,
+    selectedOpt,
+    questionObj
+) {
     if (quizState.isAnswered) return;
 
     quizState.isAnswered = true;
 
-    const session = await getActiveSession();
-    const sessionToken = session ? session.session_token : null;
+    const session =
+        await getActiveSession();
+
+    const sessionToken =
+        session
+            ? session.session_token
+            : null;
 
     if (!sessionToken) {
-        alert("Sesi habis, silakan login ulang.");
+        alert(
+            "Sesi habis, silakan login ulang."
+        );
+
         window.location.reload();
         return;
     }
 
-    const isCorrect = selectedOpt.correct;
-    const pointsEarned = isCorrect ? (questionObj.points || 10) : 0;
+    const isCorrect =
+        selectedOpt.correct;
+
+    const pointsEarned =
+        isCorrect
+            ? (questionObj.points || 10)
+            : 0;
 
     if (isCorrect) {
         quizState.correctCount++;
@@ -429,137 +644,289 @@ async function handleAnswer(optionIndex, selectedOpt, questionObj) {
         quizState.wrongCount++;
     }
 
-    const optionButtons = document.querySelectorAll(".option-card");
+    const optionButtons =
+        document.querySelectorAll(
+            ".option-card"
+        );
 
-    optionButtons.forEach((btn, idx) => {
-        btn.disabled = true;
+    optionButtons.forEach(
+        (btn, idx) => {
+            btn.disabled = true;
 
-        if (questionObj.options[idx].correct) {
-            btn.style.background = "#DCFCE7";
-            btn.style.borderColor = "#22C55E";
-            btn.style.color = "#166534";
-        } else if (idx === optionIndex && !isCorrect) {
-            btn.style.background = "#FEE2E2";
-            btn.style.borderColor = "#EF4444";
-            btn.style.color = "#991B1B";
+            if (
+                questionObj
+                    .options[idx]
+                    .correct
+            ) {
+                btn.style.background =
+                    "#DCFCE7";
+
+                btn.style.borderColor =
+                    "#22C55E";
+
+                btn.style.color =
+                    "#166534";
+            } else if (
+                idx === optionIndex &&
+                !isCorrect
+            ) {
+                btn.style.background =
+                    "#FEE2E2";
+
+                btn.style.borderColor =
+                    "#EF4444";
+
+                btn.style.color =
+                    "#991B1B";
+            }
         }
-    });
+    );
 
-    const feedbackEl = document.getElementById("quiz-feedback");
+    const feedbackEl =
+        document.getElementById(
+            "quiz-feedback"
+        );
 
-    feedbackEl.className = `message ${isCorrect ? "success" : "error"}`;
+    feedbackEl.className =
+        `message ${
+            isCorrect
+                ? "success"
+                : "error"
+        }`;
+
     feedbackEl.style.cssText = `
         margin-top:16px;
         padding:16px;
         border-radius:16px;
-        background:${isCorrect ? "#F0FDF4" : "#FEF2F2"};
-        color:${isCorrect ? "#166534" : "#B91C1C"};
-        border:2px solid ${isCorrect ? "#86EFAC" : "#FCA5A5"};
+        background:${
+            isCorrect
+                ? "#F0FDF4"
+                : "#FEF2F2"
+        };
+        color:${
+            isCorrect
+                ? "#166534"
+                : "#B91C1C"
+        };
+        border:2px solid ${
+            isCorrect
+                ? "#86EFAC"
+                : "#FCA5A5"
+        };
     `;
 
     feedbackEl.innerHTML = `
         <strong style="font-size:16px;display:block;margin-bottom:4px;">
-            ${isCorrect ? "🎉 Benar!" : "💡 Belum tepat."}
+            ${
+                isCorrect
+                    ? "🎉 Benar!"
+                    : "💡 Belum tepat."
+            }
         </strong>
-        <span>${questionObj.explanation || "Tetap semangat mencoba ya!"}</span>
+
+        <span>
+            ${
+                questionObj.explanation ||
+                "Tetap semangat mencoba ya!"
+            }
+        </span>
     `;
 
-    feedbackEl.classList.remove("hidden");
-    document.getElementById("btn-next-question").classList.remove("hidden");
+    feedbackEl.classList.remove(
+        "hidden"
+    );
+
+    document
+        .getElementById(
+            "btn-next-question"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
     try {
-        const { error } = await supabase.rpc("save_student_answer", {
-            p_session_token: sessionToken,
-            p_attempt_id: quizState.attemptId,
-            p_question_id: questionObj.id,
-            p_question_version: questionObj.version || 1,
-            p_selected_answer: {
-                selected_index: optionIndex,
-                text: selectedOpt.text
-            },
-            p_is_correct: isCorrect,
-            p_points: pointsEarned
-        });
+        const {
+            error
+        } = await supabase.rpc(
+            "save_student_answer",
+            {
+                p_session_token:
+                    sessionToken,
+
+                p_attempt_id:
+                    quizState.attemptId,
+
+                p_question_id:
+                    questionObj.id,
+
+                p_question_version:
+                    questionObj.version || 1,
+
+                p_selected_answer: {
+                    selected_index:
+                        optionIndex,
+
+                    text:
+                        selectedOpt.text
+                },
+
+                p_is_correct:
+                    isCorrect,
+
+                p_points:
+                    pointsEarned
+            }
+        );
 
         if (error) throw error;
 
-        // Simpan posisi berikutnya hanya setelah jawaban berhasil tersimpan.
         quizState.currentIndex++;
-        saveQuizProgress(session, quizState.questions.length);
+
+        await saveQuizProgress(
+            session
+        );
+
         quizState.currentIndex--;
     } catch (err) {
-        console.error("Gagal menyimpan jawaban ke database:", err);
+        console.error(
+            "Gagal menyimpan jawaban ke database:",
+            err
+        );
     }
 }
 
 /* ================================
    NEXT QUESTION
 ================================ */
-function handleNextQuestion() {
+
+async function handleNextQuestion() {
     quizState.currentIndex++;
 
-    if (quizState.currentIndex < quizState.questions.length) {
+    if (
+        quizState.currentIndex <
+        quizState.questions.length
+    ) {
+        await saveQuizProgress(
+            await getActiveSession()
+        );
+
         renderQuestion();
     } else {
-        finishQuiz();
+        await finishQuiz();
     }
 }
 
 /* ================================
    FINISH QUIZ
 ================================ */
+
 async function finishQuiz() {
-    const session = await getActiveSession();
-    const sessionToken = session ? session.session_token : null;
+    const session =
+        await getActiveSession();
+
+    const sessionToken =
+        session
+            ? session.session_token
+            : null;
 
     if (!sessionToken) {
-        alert("Sesi habis, silakan login ulang.");
+        alert(
+            "Sesi habis, silakan login ulang."
+        );
+
         window.location.reload();
         return;
     }
 
     try {
-        const { data, error } = await supabase.rpc(
+        const {
+            data,
+            error
+        } = await supabase.rpc(
             "complete_student_attempt",
             {
-                p_session_token: sessionToken,
-                p_attempt_id: quizState.attemptId
+                p_session_token:
+                    sessionToken,
+
+                p_attempt_id:
+                    quizState.attemptId
             }
         );
 
         if (error) throw error;
 
-        clearQuizProgress(session, quizState.packageId);
+        await clearQuizProgress(
+            session,
+            quizState.packageId
+        );
 
-        const resultData = Array.isArray(data) ? data[0] : data;
-        renderResultScreen(resultData || {});
+        const resultData =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+        renderResultScreen(
+            resultData || {}
+        );
     } catch (err) {
-        console.error("Gagal menyelesaikan attempt:", err);
-        alert("Gagal menyimpan hasil akhir kuis ke server.");
+        console.error(
+            "Gagal menyelesaikan attempt:",
+            err
+        );
+
+        alert(
+            "Gagal menyimpan hasil akhir kuis ke server."
+        );
     }
 }
 
 /* ================================
    RESULT SCREEN
 ================================ */
-function renderResultScreen(resultData) {
-    const app = document.getElementById("app");
-    const oldQuiz = document.getElementById("view-quiz");
 
-    if (oldQuiz) oldQuiz.remove();
+function renderResultScreen(
+    resultData
+) {
+    const app =
+        document.getElementById("app");
 
-    const finalScore = resultData.score || 0;
-    const correct = resultData.correct_count ?? quizState.correctCount;
-    const wrong = resultData.wrong_count ?? quizState.wrongCount;
+    const oldQuiz =
+        document.getElementById(
+            "view-quiz"
+        );
 
-    const section = document.createElement("section");
-    section.id = "view-result";
-    section.className = "view hidden";
+    if (oldQuiz) {
+        oldQuiz.remove();
+    }
+
+    const finalScore =
+        resultData.score || 0;
+
+    const correct =
+        resultData.correct_count ??
+        quizState.correctCount;
+
+    const wrong =
+        resultData.wrong_count ??
+        quizState.wrongCount;
+
+    const section =
+        document.createElement(
+            "section"
+        );
+
+    section.id =
+        "view-result";
+
+    section.className =
+        "view hidden";
 
     section.innerHTML = `
         <div class="result-container" style="max-width:480px;margin:40px auto;padding:20px;text-align:center;">
             <div class="result-card" style="background:var(--surface);border:3px solid var(--border);border-radius:28px;padding:40px 24px;box-shadow:var(--shadow-soft);">
-                <div style="font-size:64px;margin-bottom:12px;">🏆</div>
+                <div style="font-size:64px;margin-bottom:12px;">
+                    🏆
+                </div>
 
                 <h2 style="font-size:26px;margin:0 0 24px;">
                     Hore, Kuis Selesai!
@@ -580,6 +947,7 @@ function renderResultScreen(resultData) {
                         <strong style="color:#166534;font-size:18px;display:block;">
                             ✅ ${correct}
                         </strong>
+
                         <span style="font-size:13px;color:#15803D;font-weight:600;">
                             Benar
                         </span>
@@ -589,13 +957,18 @@ function renderResultScreen(resultData) {
                         <strong style="color:#991B1B;font-size:18px;display:block;">
                             ❌ ${wrong}
                         </strong>
+
                         <span style="font-size:13px;color:#B91C1C;font-weight:600;">
                             Salah
                         </span>
                     </div>
                 </div>
 
-                <button id="btn-result-home" class="primary-button" type="button">
+                <button
+                    id="btn-result-home"
+                    class="primary-button"
+                    type="button"
+                >
                     🏠 Kembali ke Beranda
                 </button>
             </div>
@@ -603,38 +976,78 @@ function renderResultScreen(resultData) {
     `;
 
     app.appendChild(section);
+
     showView("view-result");
 
-    document.getElementById("btn-result-home").addEventListener("click", () => {
-        showView("view-home");
-    });
+    document
+        .getElementById(
+            "btn-result-home"
+        )
+        .addEventListener(
+            "click",
+            () => {
+                showView(
+                    "view-home"
+                );
+            }
+        );
 }
 
 /* ================================
    VIEW
 ================================ */
-function showView(id) {
-    document.querySelectorAll(".view").forEach(view => {
-        view.classList.add("hidden");
-        view.classList.remove("active");
-    });
 
-    const target = document.getElementById(id);
+function showView(id) {
+    document
+        .querySelectorAll(".view")
+        .forEach(view => {
+            view.classList.add(
+                "hidden"
+            );
+
+            view.classList.remove(
+                "active"
+            );
+        });
+
+    const target =
+        document.getElementById(id);
 
     if (!target) return;
 
-    target.classList.remove("hidden");
-    target.classList.add("active");
+    target.classList.remove(
+        "hidden"
+    );
+
+    target.classList.add(
+        "active"
+    );
 }
 
 /* ================================
    ESCAPE HTML
 ================================ */
+
 function escapeHtml(value) {
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
