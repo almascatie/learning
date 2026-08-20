@@ -7,7 +7,6 @@ export default {
     render(container) {
         container.innerHTML = `
             <div class="gempa-activity">
-
                 <style>
                     .gempa-activity {
                         color: var(--text-dark);
@@ -180,15 +179,9 @@ export default {
                     }
                 </style>
 
-                <!-- HALAMAN 1 -->
                 <div class="gempa-page active" data-page="1">
-
                     <h2>🧩 Dari Mana Asalnya Gempa Bumi?</h2>
-
-                    <p>
-                        <strong>Kok Bumi Bisa Goyang-Goyang, Ya?</strong>
-                    </p>
-
+                    <p><strong>Kok Bumi Bisa Goyang-Goyang, Ya?</strong></p>
                     <p>
                         Tahu tidak? Bumi tempat kita berdiri sekarang itu seperti
                         mainan puzzle raksasa yang besar sekali!
@@ -202,29 +195,16 @@ export default {
                     </p>
 
                     <div class="gempa-canvas-box">
-                        <canvas
-                            class="gempa-canvas"
-                            width="540"
-                            height="230"
-                        ></canvas>
-
+                        <canvas class="gempa-canvas" width="540" height="230"></canvas>
                         <div class="gempa-canvas-hint">
                             👇 Yuk, klik gambarnya buat lihat lempeng puzzlenya tabrakan!
                         </div>
                     </div>
-
                 </div>
 
-
-                <!-- HALAMAN 2 -->
                 <div class="gempa-page" data-page="2">
-
                     <h2>🎒 Pas Bumi Goyang, Harus Gimana?</h2>
-
-                    <p>
-                        <strong>Ups, Ada Gempa! Pilih Aksi Hebatmu!</strong>
-                    </p>
-
+                    <p><strong>Ups, Ada Gempa! Pilih Aksi Hebatmu!</strong></p>
                     <p>
                         Saat tanah mulai bergoyang, ingat!
                         Tugas utama kita adalah menyelamatkan
@@ -236,7 +216,6 @@ export default {
 
                     <div class="gempa-scenario" data-result="res1">
                         <strong>🚪 [Depan Kelas]</strong> — Klik untuk lihat aksi!
-
                         <div id="res1" class="gempa-scenario-result">
                             ✨ <i>Hore, Pintu Dekat!</i>
                             Anak langsung mengambil tas sekolah, ditaruh di atas
@@ -247,7 +226,6 @@ export default {
 
                     <div class="gempa-scenario" data-result="res2">
                         <strong>🪑 [Tengah Kelas]</strong> — Klik untuk lihat aksi!
-
                         <div id="res2" class="gempa-scenario-result">
                             ✨ <i>Lihat Situasi Dulu!</i>
                             Karena posisinya di tengah kelas, anak melihat ke depan.
@@ -260,7 +238,6 @@ export default {
 
                     <div class="gempa-scenario" data-result="res3">
                         <strong>🏫 [Belakang Kelas]</strong> — Klik untuk lihat aksi!
-
                         <div id="res3" class="gempa-scenario-result">
                             ✨ <i>Aman, Berlindung Dulu!</i>
                             Karena pintu jauh dan kelas penuh, anak memakai tas
@@ -269,15 +246,10 @@ export default {
                             kelas setelah gempanya reda.
                         </div>
                     </div>
-
                 </div>
 
-
-                <!-- HALAMAN 3 -->
                 <div class="gempa-page" data-page="3">
-
                     <h2>📝 Kuis Detektif Gempa!</h2>
-
                     <p>
                         Wah, kamu hebat sudah selesai membaca dan mencoba simulasi!
                         Sekarang, yuk bantu Detektif Gempa menjawab tantangan
@@ -290,7 +262,6 @@ export default {
                     </p>
 
                     <div class="gempa-options">
-
                         <button class="gempa-option"
                             data-correct="true"
                             data-feedback="Hebat, jawabanmu Benar! Potongan lempeng bumi di bawah tanah memang selalu bergerak. Pas mereka tabrakan, tanah di atasnya ikut bergoyang dan jadilah gempa!">
@@ -308,19 +279,13 @@ export default {
                             data-feedback="Oops, kurang tepat! Jawaban yang benar adalah A. Matahari atau angin tidak bisa bikin tanah bergoyang sekeras itu. Gempa terjadi karena potongan lempeng puzzle di bawah tanah saling tabrakan keras!">
                             C. Karena ditiup angin yang sangat kencang.
                         </button>
-
                     </div>
 
                     <div class="gempa-feedback"></div>
-
                 </div>
 
-
-                <!-- HALAMAN 4 -->
                 <div class="gempa-page" data-page="4">
-
                     <h2>📝 Kuis Detektif Gempa!</h2>
-
                     <p>
                         <strong>🛡️ Tantangan 2: Tameng Sakti</strong><br>
                         Pas ada gempa, bagian tubuh mana yang paling penting
@@ -328,7 +293,6 @@ export default {
                     </p>
 
                     <div class="gempa-options">
-
                         <button class="gempa-option"
                             data-correct="false"
                             data-feedback="Wah, sayang sekali! Jawaban yang benar adalah B. Sepatu dan kantong jajan bisa dicari lagi nanti, tapi kepala dan leher kita harus dilindungi nomor satu agar tidak terluka tertimpa benda jatuh.">
@@ -346,19 +310,13 @@ export default {
                             data-feedback="Wah, sayang sekali! Jawaban yang benar adalah B. Sepatu dan kantong jajan bisa dicari lagi nanti, tapi kepala dan leher kita harus dilindungi nomor satu agar tidak terluka tertimpa benda jatuh.">
                             C. Kantong baju tempat menyimpan jajan.
                         </button>
-
                     </div>
 
                     <div class="gempa-feedback"></div>
-
                 </div>
 
-
-                <!-- HALAMAN 5 -->
                 <div class="gempa-page" data-page="5">
-
                     <h2>📝 Kuis Detektif Gempa!</h2>
-
                     <p>
                         <strong>🏫 Tantangan 3: Anak Pintar di Dalam Kelas</strong><br>
                         Kalau kamu duduk di pojok kelas yang sempit dan jauh dari
@@ -366,7 +324,6 @@ export default {
                     </p>
 
                     <div class="gempa-options">
-
                         <button class="gempa-option"
                             data-correct="false"
                             data-feedback="Yuk, coba lagi! Jawaban yang benar adalah C. Lari rebutan bisa bikin kamu terjatuh dan terinjak teman, sedangkan diam saja bikin kamu bahaya kejatuhan atap. Pilihan terbaik adalah pakai tas jadi helm dan merunduk aman di samping meja!">
@@ -384,19 +341,13 @@ export default {
                             data-feedback="Tepat Sekali! Berdesakan di pintu sangat berbahaya karena bisa bikin jatuh tertimbun. Berlindung dulu pakai tas di dekat meja jauh lebih aman!">
                             C. Pakai tas sekolah jadi helm, lalu merunduk di samping meja yang jauh dari kaca jendela.
                         </button>
-
                     </div>
 
                     <div class="gempa-feedback"></div>
-
                 </div>
 
-
-                <!-- HALAMAN 6 -->
                 <div class="gempa-page" data-page="6">
-
                     <h2>📝 Kuis Detektif Gempa!</h2>
-
                     <p>
                         <strong>🏃‍♂️ Tantangan 4: Setelah Goyangan Berhenti</strong><br>
                         Nah, kalau buminya sudah tenang dan tidak goyang lagi,
@@ -404,7 +355,6 @@ export default {
                     </p>
 
                     <div class="gempa-options">
-
                         <button class="gempa-option"
                             data-correct="true"
                             data-feedback="Luar Biasa, kamu Benar! Lapangan terbuka adalah tempat paling aman karena tidak ada atap atau pohon yang bisa roboh menimpa kita.">
@@ -422,21 +372,13 @@ export default {
                             data-feedback="Hampir benar, yuk pelajari lagi! Jawaban yang benar adalah A. Jangan masuk lagi ke kelas atau diam mengobrol karena bisa saja ada gempa susulan. Begitu gempa reda, langsung jalan tertib keluar ke lapangan terbuka ya!">
                             C. Malah duduk-duduk santai di kelas sambil mengobrol.
                         </button>
-
                     </div>
 
                     <div class="gempa-feedback"></div>
-
                 </div>
 
-
-                <!-- NAVIGASI -->
                 <div class="gempa-nav">
-
-                    <button
-                        type="button"
-                        class="gempa-prev"
-                    >
+                    <button type="button" class="gempa-prev">
                         ⬅️ Sebelumnya
                     </button>
 
@@ -444,15 +386,10 @@ export default {
                         Halaman 1 dari 6
                     </span>
 
-                    <button
-                        type="button"
-                        class="gempa-next"
-                    >
+                    <button type="button" class="gempa-next">
                         Selanjutnya ➡️
                     </button>
-
                 </div>
-
             </div>
         `;
 
@@ -460,9 +397,7 @@ export default {
     }
 };
 
-
 function initGempa(container) {
-
     let currentPage = 1;
     const totalPages = 6;
 
@@ -472,7 +407,6 @@ function initGempa(container) {
     const indicator = container.querySelector(".gempa-page-indicator");
 
     function updatePage() {
-
         pages.forEach(page => {
             page.classList.remove("active");
         });
@@ -489,7 +423,14 @@ function initGempa(container) {
             `Halaman ${currentPage} dari ${totalPages}`;
 
         prevBtn.disabled = currentPage === 1;
-        nextBtn.disabled = currentPage === totalPages;
+
+        if (currentPage === totalPages) {
+            nextBtn.disabled = false;
+            nextBtn.textContent = "Selesai ✅";
+        } else {
+            nextBtn.disabled = false;
+            nextBtn.textContent = "Selanjutnya ➡️";
+        }
 
         if (currentPage === 1) {
             startCanvas();
@@ -497,34 +438,31 @@ function initGempa(container) {
     }
 
     prevBtn.addEventListener("click", () => {
-
         if (currentPage <= 1) return;
 
         currentPage--;
-
         updatePage();
     });
 
     nextBtn.addEventListener("click", () => {
+        if (currentPage === totalPages) {
+            const quitButton = document.getElementById("btn-quit-stem");
 
-        if (currentPage >= totalPages) return;
+            if (quitButton) {
+                quitButton.click();
+            }
+
+            return;
+        }
 
         currentPage++;
-
         updatePage();
     });
-
-
-    /* =========================
-       SKENARIO
-    ========================= */
 
     container
         .querySelectorAll(".gempa-scenario")
         .forEach(card => {
-
             card.addEventListener("click", () => {
-
                 const resultId = card.dataset.result;
 
                 container
@@ -533,29 +471,19 @@ function initGempa(container) {
                         result.style.display = "none";
                     });
 
-                const result =
-                    container.querySelector(`#${resultId}`);
+                const result = container.querySelector(`#${resultId}`);
 
                 if (result) {
                     result.style.display = "block";
                 }
             });
-
         });
-
-
-    /* =========================
-       KUIS
-    ========================= */
 
     container
         .querySelectorAll(".gempa-option")
         .forEach(button => {
-
             button.addEventListener("click", () => {
-
-                const parent =
-                    button.closest(".gempa-page");
+                const parent = button.closest(".gempa-page");
 
                 if (!parent) return;
 
@@ -586,13 +514,7 @@ function initGempa(container) {
 
                 feedback.style.display = "block";
             });
-
         });
-
-
-    /* =========================
-       CANVAS GEMPA
-    ========================= */
 
     const canvas =
         container.querySelector(".gempa-canvas");
@@ -609,7 +531,6 @@ function initGempa(container) {
     let shakeFrames = 0;
 
     function drawStickFigure(x, y) {
-
         ctx.strokeStyle = "#334155";
         ctx.lineWidth = 2;
 
@@ -621,46 +542,35 @@ function initGempa(container) {
         ctx.stroke();
 
         ctx.beginPath();
-
         ctx.moveTo(x, y + 5);
         ctx.lineTo(x, y + 15);
-
         ctx.moveTo(x, y + 15);
         ctx.lineTo(x - 4, y + 22);
-
         ctx.moveTo(x, y + 15);
         ctx.lineTo(x + 4, y + 22);
-
         ctx.stroke();
     }
 
-
     function drawHouse(x, y) {
-
         ctx.fillStyle = "#FEE2E2";
         ctx.fillRect(x, y + 8, 18, 14);
 
         ctx.strokeStyle = "#991B1B";
         ctx.lineWidth = 1.5;
-
         ctx.strokeRect(x, y + 8, 18, 14);
 
         ctx.fillStyle = "#EF4444";
 
         ctx.beginPath();
-
         ctx.moveTo(x - 2, y + 8);
         ctx.lineTo(x + 9, y);
         ctx.lineTo(x + 20, y + 8);
-
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
     }
 
-
     function drawTree(x, y) {
-
         ctx.fillStyle = "#B45309";
         ctx.fillRect(x + 5, y + 10, 4, 12);
 
@@ -675,9 +585,7 @@ function initGempa(container) {
         ctx.stroke();
     }
 
-
     function renderScene() {
-
         if (currentPage !== 1) return;
 
         ctx.clearRect(
@@ -691,26 +599,18 @@ function initGempa(container) {
         let shakeY = 0;
 
         if (shakeFrames > 0) {
-
-            shakeX =
-                (Math.random() - 0.5) * 8;
-
-            shakeY =
-                (Math.random() - 0.5) * 8;
-
+            shakeX = (Math.random() - 0.5) * 8;
+            shakeY = (Math.random() - 0.5) * 8;
             shakeFrames--;
 
             if (shakeFrames === 0) {
-
                 state = "resting";
-
                 hint.textContent =
                     "✨ Selesai! Klik lagi untuk mengulang.";
             }
         }
 
         ctx.save();
-
         ctx.translate(shakeX, shakeY);
 
         const baseA = 20;
@@ -721,32 +621,20 @@ function initGempa(container) {
             state === "collision" ||
             shakeFrames > 0
         ) {
-
             if (animProgress < 25) {
-
                 animProgress += 0.7;
-
             } else {
-
                 if (state === "moving") {
-
                     state = "collision";
                     shakeFrames = 70;
                 }
             }
         }
 
-        const currentA =
-            baseA + animProgress;
-
-        const currentB =
-            baseB - animProgress;
-
-
-        /* LEMPENG A */
+        const currentA = baseA + animProgress;
+        const currentB = baseB - animProgress;
 
         ctx.fillStyle = "#93C5FD";
-
         ctx.fillRect(
             currentA,
             55,
@@ -765,7 +653,6 @@ function initGempa(container) {
         );
 
         ctx.fillStyle = "#86EFAC";
-
         ctx.fillRect(
             currentA,
             42,
@@ -806,9 +693,6 @@ function initGempa(container) {
             currentA + 65,
             125
         );
-
-
-        /* LEMPENG B */
 
         ctx.fillStyle = "#FDE68A";
 
@@ -872,9 +756,6 @@ function initGempa(container) {
             125
         );
 
-
-        /* GARIS PATAHAN */
-
         const faultX =
             currentA + 210;
 
@@ -902,11 +783,7 @@ function initGempa(container) {
 
         ctx.stroke();
 
-
-        /* EFEK GEMPA */
-
         if (shakeFrames > 0) {
-
             ctx.fillStyle = "#FEF08A";
             ctx.strokeStyle = "#DC2626";
             ctx.lineWidth = 2.5;
@@ -939,23 +816,18 @@ function initGempa(container) {
         requestAnimationFrame(renderScene);
     }
 
-
     canvas.addEventListener("click", () => {
-
         if (
             state === "idle" ||
             state === "resting"
         ) {
-
             state = "moving";
             animProgress = 0;
 
             hint.textContent =
                 "⚡ Lempeng bertabrakan, daratan bergoyang!";
         }
-
     });
-
 
     function startCanvas() {
         renderScene();
