@@ -21,13 +21,20 @@ export async function saveSession(session) {
 }
 
 export async function getSession(sessionId) {
-    return db.sessions.get(sessionId);
+    return await db.sessions.get(sessionId);
 }
 
 export async function getActiveSession(studentId) {
-    const sessions = await db.sessions.where("student_id").equals(studentId).toArray();
+    const sessions = await db.sessions
+        .where("student_id")
+        .equals(studentId)
+        .toArray();
+
     const now = Date.now();
-    return sessions.find(session => new Date(session.expires_at).getTime() > now) || null;
+
+    return sessions.find(
+        session => new Date(session.expires_at).getTime() > now
+    ) || null;
 }
 
 export async function deleteSession(sessionId) {
@@ -35,8 +42,16 @@ export async function deleteSession(sessionId) {
 }
 
 export async function clearStudentSessions(studentId) {
-    const sessions = await db.sessions.where("student_id").equals(studentId).toArray();
-    await db.sessions.bulkDelete(sessions.map(session => session.session_id));
+    const sessions = await db.sessions
+        .where("student_id")
+        .equals(studentId)
+        .toArray();
+
+    if (sessions.length) {
+        await db.sessions.bulkDelete(
+            sessions.map(session => session.session_id)
+        );
+    }
 }
 
 export { db };
