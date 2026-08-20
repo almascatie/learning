@@ -348,6 +348,6 @@ export default {
       ],
       explanation: "A — Salah. 14 cm hanya dua sisi. B — Salah. Belah ketupat memiliki empat sisi. C — Benar. 4 × 7 = 28 cm. D — Salah. 7 × 7 = 49 bukan rumus keliling.",
       points: 10
-    },
+    }
 ]
 };
