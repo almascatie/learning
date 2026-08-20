@@ -18,29 +18,24 @@ export async function initStudentApp() {
 /* ================================
    SESSION RECOVERY
 ================================ */
-
 async function recoverSession() {
     try {
         const sessions = await db.sessions.toArray();
         if (!sessions.length) return false;
 
         const now = Date.now();
-        const session = sessions.find(item =>
-            new Date(item.expires_at).getTime() > now
-        );
-
+        const session = sessions.find(item => new Date(item.expires_at).getTime() > now);
         if (!session) return false;
 
-        const { data, error } = await supabase.rpc(
-            "validate_student_session",
-            { p_session_token: session.session_token }
-        );
+        const { data, error } = await supabase.rpc("validate_student_session", {
+            p_session_token: session.session_token
+        });
 
         if (error || !data) return false;
 
         state.sessionId = session.session_id;
 
-        // Pulihkan kembali siswa yang sedang login.
+        // Pulihkan siswa aktif agar tombol Kuis tetap mengetahui grade.
         state.selectedStudent = {
             id: session.student_id,
             name: session.student_name,
@@ -48,12 +43,9 @@ async function recoverSession() {
             avatar: session.avatar || "👧"
         };
 
-        document.getElementById("home-avatar").textContent =
-            session.avatar || "👧";
-        document.getElementById("home-student-name").textContent =
-            session.student_name;
-        document.getElementById("home-student-grade").textContent =
-            `Kelas ${session.grade}`;
+        document.getElementById("home-avatar").textContent = session.avatar || "👧";
+        document.getElementById("home-student-name").textContent = session.student_name;
+        document.getElementById("home-student-grade").textContent = `Kelas ${session.grade}`;
 
         showView("view-home");
         return true;
@@ -66,7 +58,6 @@ async function recoverSession() {
 /* ================================
    EVENTS
 ================================ */
-
 function bindEvents() {
     document.getElementById("btn-back-student").addEventListener("click", () => {
         state.selectedStudent = null;
@@ -78,39 +69,19 @@ function bindEvents() {
 
     document.getElementById("btn-logout").addEventListener("click", logoutStudent);
 
+    document.getElementById("btn-back-home").addEventListener("click", () => {
+        showView("view-home");
+    });
+
     document.getElementById("student-pin").addEventListener("keydown", event => {
         if (event.key === "Enter") loginStudent();
     });
 
     document.querySelectorAll("[data-activity]").forEach(button => {
-        button.addEventListener("click", async () => {
+        button.addEventListener("click", () => {
             const activity = button.dataset.activity;
 
             if (activity === "quiz") {
-                // Jika state hilang, ambil kembali siswa dari session aktif.
-                if (!state.selectedStudent) {
-                    try {
-                        const sessions = await db.sessions.toArray();
-                        const now = Date.now();
-
-                        const session = sessions.find(item =>
-                            new Date(item.expires_at).getTime() > now
-                        );
-
-                        if (session) {
-                            state.sessionId = session.session_id;
-                            state.selectedStudent = {
-                                id: session.student_id,
-                                name: session.student_name,
-                                grade: session.grade,
-                                avatar: session.avatar || "👧"
-                            };
-                        }
-                    } catch (err) {
-                        console.error("Session recovery for quiz:", err);
-                    }
-                }
-
                 const grade = state.selectedStudent?.grade;
 
                 if (!grade) {
@@ -130,7 +101,6 @@ function bindEvents() {
 /* ================================
    LOAD STUDENTS
 ================================ */
-
 async function loadStudents() {
     const container = document.getElementById("student-list");
     const error = document.getElementById("student-error");
@@ -152,7 +122,6 @@ async function loadStudents() {
 /* ================================
    RENDER STUDENTS
 ================================ */
-
 function renderStudents(students) {
     const container = document.getElementById("student-list");
     container.innerHTML = "";
@@ -181,16 +150,12 @@ function renderStudents(students) {
 /* ================================
    SELECT STUDENT
 ================================ */
-
 function selectStudent(student) {
     state.selectedStudent = student;
 
-    document.getElementById("selected-student-avatar").textContent =
-        student.avatar || "👧";
-    document.getElementById("selected-student-name").textContent =
-        student.name;
-    document.getElementById("selected-student-grade").textContent =
-        `Kelas ${student.grade}`;
+    document.getElementById("selected-student-avatar").textContent = student.avatar || "👧";
+    document.getElementById("selected-student-name").textContent = student.name;
+    document.getElementById("selected-student-grade").textContent = `Kelas ${student.grade}`;
     document.getElementById("student-pin").value = "";
     document.getElementById("pin-error").classList.add("hidden");
 
@@ -204,7 +169,6 @@ function selectStudent(student) {
 /* ================================
    LOGIN
 ================================ */
-
 async function loginStudent() {
     if (!state.selectedStudent) return;
 
@@ -241,20 +205,17 @@ async function loginStudent() {
 
         state.sessionId = result.session_id;
 
-        document.getElementById("home-avatar").textContent =
-            result.avatar || state.selectedStudent.avatar || "👧";
-        document.getElementById("home-student-name").textContent =
-            result.student_name || state.selectedStudent.name;
-        document.getElementById("home-student-grade").textContent =
-            `Kelas ${result.grade || state.selectedStudent.grade}`;
-
-        // Pastikan state tetap lengkap setelah login.
+        // Pastikan state siswa tetap lengkap setelah login.
         state.selectedStudent = {
             id: result.student_id || state.selectedStudent.id,
             name: result.student_name || state.selectedStudent.name,
             grade: result.grade || state.selectedStudent.grade,
             avatar: result.avatar || state.selectedStudent.avatar || "👧"
         };
+
+        document.getElementById("home-avatar").textContent = state.selectedStudent.avatar;
+        document.getElementById("home-student-name").textContent = state.selectedStudent.name;
+        document.getElementById("home-student-grade").textContent = `Kelas ${state.selectedStudent.grade}`;
 
         showView("view-home");
     } catch (err) {
@@ -280,7 +241,6 @@ async function loginStudent() {
 /* ================================
    LOGOUT
 ================================ */
-
 async function logoutStudent() {
     try {
         if (state.sessionId) {
@@ -302,7 +262,6 @@ async function logoutStudent() {
 /* ================================
    LOGIN ERROR
 ================================ */
-
 function showLoginError(code) {
     const error = document.getElementById("pin-error");
 
@@ -320,7 +279,6 @@ function showLoginError(code) {
 /* ================================
    VIEW
 ================================ */
-
 function showView(id) {
     document.querySelectorAll(".view").forEach(view => {
         view.classList.add("hidden");
@@ -338,7 +296,6 @@ function showView(id) {
 /* ================================
    ESCAPE HTML
 ================================ */
-
 function escapeHtml(value) {
     return String(value)
         .replaceAll("&", "&amp;")
