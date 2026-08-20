@@ -1,8 +1,8 @@
 export default {
-  package_id: "k5-matematika-01",
+  package_id: "k5-matematika-02",
   grade: 5,
   subject: "Matematika",
-  title: "Matematika Kelas 5 — Paket 1 (Bab 1 sampai 4)",
+  title: "Matematika Kelas 5 — Paket 2 (Bab 1 sampai 4)",
   total_questions: 100,
   questions: [
 
