@@ -11,6 +11,7 @@ export const stemManifest = [
         grade: 2,
         title: "Petualangan Menghadapi Gempa",
         description: "Belajar tentang gempa dan cara menyelamatkan diri.",
-        icon: "🌋"
+        icon: "🌋",
+        file: "./gempa.js"
     }
 ];
