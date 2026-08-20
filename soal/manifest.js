@@ -26,5 +26,12 @@ export const quizManifest = [
         subject: "Matematika",
         title: "testtt",
         file: "./kelas-2/matematika-04.js"
+    },
+        {
+        id: "k2-matematika-05",
+        grade: 2,
+        subject: "Matematika",
+        title: "bicara aja",
+        file: "./kelas-2/matematika-01.js"
     }
 ];
