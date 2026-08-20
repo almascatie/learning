@@ -323,3 +323,21 @@ function escapeHtml(value) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
+
+
+<!-- =========================================
+             VIEW: PILIH PAKET KUIS
+        ========================================== -->
+        <section id="view-quiz-packages" class="view hidden">
+            <div class="student-home-container">
+                <header class="home-header">
+                    <button id="btn-back-home" class="back-button" type="button">← Kembali ke Beranda</button>
+                    <h2 style="margin-top: 12px;">Pilih Paket Kuis 🎯</h2>
+                    <p style="color: var(--muted); margin: 0;">Pilih salah satu paket untuk mulai mengerjakan soal.</p>
+                </header>
+
+                <div id="package-list" class="activity-menu" style="margin-top: 20px;">
+                    <div class="loading">Memuat paket soal...</div>
+                </div>
+            </div>
+        </section>
