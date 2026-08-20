@@ -6,19 +6,17 @@ export function renderQuizContainer(state, callbacks) {
         return;
     }
 
-    // Sembunyikan view yang sedang aktif
     document.querySelectorAll(".view").forEach(view => {
         view.classList.add("hidden");
         view.classList.remove("active");
     });
 
-    // Hapus view kuis lama jika ada
     const oldQuizView = document.getElementById("view-quiz");
+
     if (oldQuizView) {
         oldQuizView.remove();
     }
 
-    // Buat view kuis baru
     const quizView = document.createElement("section");
 
     quizView.id = "view-quiz";
@@ -44,56 +42,116 @@ export function renderQuizContainer(state, callbacks) {
         </div>
     `;
 
-    // Tambahkan ke #app TANPA menghapus view lain
     app.appendChild(quizView);
 
-    document
-        .getElementById("btn-quit-quiz")
-        .addEventListener("click", callbacks.onQuit);
+    const quitButton = document.getElementById("btn-quit-quiz");
+
+    if (quitButton) {
+        quitButton.addEventListener(
+            "click",
+            callbacks.onQuit
+        );
+    }
 
     renderQuestion(state, callbacks);
 }
 
 export function renderQuestion(state, callbacks) {
-    const questionObj = state.questions[state.currentIndex];
+    const questionObj =
+        state.questions[state.currentIndex];
 
-    if (!questionObj) return;
-
-    const total = state.questions.length;
-    const number = state.currentIndex + 1;
-    const percent = (number / total) * 100;
-
-    const content = document.getElementById("quiz-content");
-    const counter = document.getElementById("quiz-counter");
-    const progressFill = document.getElementById("quiz-progress-fill");
-
-    if (!content || !counter || !progressFill) {
-        console.error("Elemen UI kuis tidak ditemukan.");
+    if (!questionObj) {
         return;
     }
 
-    counter.textContent = `Soal ${number} / ${total}`;
-    progressFill.style.width = `${percent}%`;
+    const total =
+        state.questions.length;
 
-    const imageSource = questionObj.image || questionObj.icon || "";
+    const number =
+        state.currentIndex + 1;
+
+    const percent =
+        (number / total) * 100;
+
+    const content =
+        document.getElementById("quiz-content");
+
+    const counter =
+        document.getElementById("quiz-counter");
+
+    const progressFill =
+        document.getElementById("quiz-progress-fill");
+
+    if (!content || !counter || !progressFill) {
+        console.error(
+            "Elemen UI kuis tidak ditemukan."
+        );
+        return;
+    }
+
+    counter.textContent =
+        `Soal ${number} / ${total}`;
+
+    progressFill.style.width =
+        `${percent}%`;
+
+    /*
+     * Mendukung tiga jenis visual:
+     *
+     * image  -> gambar/file
+     * icon   -> emoji/icon lama
+     * visual -> field visual pada soal
+     */
+    const imageSource =
+        questionObj.image ||
+        questionObj.icon ||
+        questionObj.visual ||
+        "";
+
+    const isImage =
+        !!questionObj.image;
 
     content.innerHTML = `
-        <div class="quiz-card" style="background:var(--surface);border:3px solid var(--border);border-radius:24px;padding:24px;box-shadow:var(--shadow-soft);">
+        <div
+            class="quiz-card"
+            style="
+                background:var(--surface);
+                border:3px solid var(--border);
+                border-radius:24px;
+                padding:24px;
+                box-shadow:var(--shadow-soft);
+            "
+        >
+
             ${
                 imageSource
                     ? `
-                        <div style="text-align:center;margin-bottom:18px;">
+                        <div
+                            style="
+                                text-align:center;
+                                margin-bottom:18px;
+                            "
+                        >
                             ${
-                                questionObj.image
+                                isImage
                                     ? `
                                         <img
                                             src="${escapeAttribute(imageSource)}"
                                             alt=""
-                                            style="max-width:180px;max-height:140px;object-fit:contain;"
+                                            style="
+                                                max-width:180px;
+                                                max-height:140px;
+                                                object-fit:contain;
+                                            "
                                         >
                                     `
                                     : `
-                                        <div style="font-size:72px;line-height:1;">
+                                        <div
+                                            style="
+                                                font-size:72px;
+                                                line-height:1;
+                                            "
+                                        >
                                             ${escapeHtml(imageSource)}
                                         </div>
                                     `
@@ -103,48 +161,89 @@ export function renderQuestion(state, callbacks) {
                     : ""
             }
 
-            <h2 style="font-size:20px;text-align:center;margin:0 0 20px;">
-                ${escapeHtml(questionObj.question || "")}
+            <h2
+                style="
+                    font-size:20px;
+                    text-align:center;
+                    margin:0 0 20px;
+                "
+            >
+                ${escapeHtml(
+                    questionObj.question || ""
+                )}
             </h2>
 
             <div id="quiz-options">
                 ${renderOptions(questionObj)}
             </div>
 
-            <div id="quiz-feedback" class="hidden"></div>
+            <div
+                id="quiz-feedback"
+                class="hidden"
+            ></div>
 
             <button
                 id="btn-next-question"
                 class="primary-button hidden"
                 type="button"
-                style="width:100%;margin-top:16px;"
+                style="
+                    width:100%;
+                    margin-top:16px;
+                "
             >
-                ${number === total ? "Selesai" : "Soal Berikutnya →"}
+                ${
+                    number === total
+                        ? "Selesai"
+                        : "Soal Berikutnya →"
+                }
             </button>
+
         </div>
     `;
 
     document
-        .querySelectorAll("#quiz-options .option-card")
+        .querySelectorAll(
+            "#quiz-options .option-card"
+        )
         .forEach((button, index) => {
-            button.addEventListener("click", () => {
-                callbacks.onAnswer(
-                    index,
-                    questionObj.options[index],
-                    questionObj
-                );
-            });
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    callbacks.onAnswer(
+                        index,
+                        questionObj.options[index],
+                        questionObj
+                    );
+
+                }
+            );
+
         });
 
-    const nextButton = document.getElementById("btn-next-question");
+    const nextButton =
+        document.getElementById(
+            "btn-next-question"
+        );
 
     if (nextButton) {
-        nextButton.addEventListener("click", callbacks.onNext);
+        nextButton.addEventListener(
+            "click",
+            callbacks.onNext
+        );
     }
 }
 
 function renderOptions(questionObj) {
-    const labels = ["A", "B", "C", "D", "E", "F"];
+    const labels = [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+    ];
 
     return (questionObj.options || [])
         .map((option, index) => `
@@ -152,80 +251,200 @@ function renderOptions(questionObj) {
                 class="option-card"
                 type="button"
                 data-option-index="${index}"
-                style="width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:14px;margin-top:12px;font-size:16px;font-weight:600;cursor:pointer;"
+                style="
+                    width:100%;
+                    display:flex;
+                    align-items:center;
+                    gap:12px;
+                    text-align:left;
+                    background:var(--surface);
+                    border:2px solid var(--border);
+                    border-radius:16px;
+                    padding:14px;
+                    margin-top:12px;
+                    font-size:16px;
+                    font-weight:600;
+                    cursor:pointer;
+                "
             >
+
                 <span
-                    style="width:34px;height:34px;min-width:34px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;"
+                    style="
+                        width:34px;
+                        height:34px;
+                        min-width:34px;
+                        border-radius:50%;
+                        background:var(--border);
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-weight:700;
+                    "
                 >
                     ${labels[index] || index + 1}
                 </span>
 
-                <span>${escapeHtml(option.text || "")}</span>
+                <span>
+                    ${escapeHtml(
+                        option.text || ""
+                    )}
+                </span>
+
             </button>
         `)
         .join("");
 }
 
-export function showAnswerFeedback(questionObj, optionIndex, isCorrect) {
-    const buttons = document.querySelectorAll("#quiz-options .option-card");
+export function showAnswerFeedback(
+    questionObj,
+    optionIndex,
+    isCorrect
+) {
+    const buttons =
+        document.querySelectorAll(
+            "#quiz-options .option-card"
+        );
 
-    buttons.forEach((button, index) => {
-        button.disabled = true;
+    buttons.forEach(
+        (button, index) => {
 
-        if (questionObj.options[index].correct) {
-            button.style.background = "#DCFCE7";
-            button.style.borderColor = "#22C55E";
-            button.style.color = "#166534";
-        } else if (index === optionIndex && !isCorrect) {
-            button.style.background = "#FEE2E2";
-            button.style.borderColor = "#EF4444";
-            button.style.color = "#991B1B";
+            button.disabled = true;
+
+            if (
+                questionObj.options[index].correct
+            ) {
+
+                button.style.background =
+                    "#DCFCE7";
+
+                button.style.borderColor =
+                    "#22C55E";
+
+                button.style.color =
+                    "#166534";
+
+            } else if (
+                index === optionIndex &&
+                !isCorrect
+            ) {
+
+                button.style.background =
+                    "#FEE2E2";
+
+                button.style.borderColor =
+                    "#EF4444";
+
+                button.style.color =
+                    "#991B1B";
+            }
+
         }
-    });
+    );
 
-    const feedback = document.getElementById("quiz-feedback");
+    const feedback =
+        document.getElementById(
+            "quiz-feedback"
+        );
 
-    if (!feedback) return;
+    if (!feedback) {
+        return;
+    }
 
-    feedback.className = `message ${isCorrect ? "success" : "error"}`;
+    feedback.className =
+        `message ${
+            isCorrect
+                ? "success"
+                : "error"
+        }`;
 
     feedback.style.cssText = `
         margin-top:16px;
         padding:16px;
         border-radius:16px;
-        background:${isCorrect ? "#F0FDF4" : "#FEF2F2"};
-        color:${isCorrect ? "#166534" : "#B91C1C"};
-        border:2px solid ${isCorrect ? "#86EFAC" : "#FCA5A5"};
+        background:${
+            isCorrect
+                ? "#F0FDF4"
+                : "#FEF2F2"
+        };
+        color:${
+            isCorrect
+                ? "#166534"
+                : "#B91C1C"
+        };
+        border:2px solid ${
+            isCorrect
+                ? "#86EFAC"
+                : "#FCA5A5"
+        };
     `;
 
     feedback.innerHTML = `
-        <strong style="font-size:16px;display:block;margin-bottom:4px;">
-            ${isCorrect ? "🎉 Benar!" : "💡 Belum tepat."}
+        <strong
+            style="
+                font-size:16px;
+                display:block;
+                margin-bottom:4px;
+            "
+        >
+            ${
+                isCorrect
+                    ? "🎉 Benar!"
+                    : "💡 Belum tepat."
+            }
         </strong>
 
         <span>
-            ${escapeHtml(questionObj.explanation || "Tetap semangat mencoba ya!")}
+            ${escapeHtml(
+                questionObj.explanation ||
+                "Tetap semangat mencoba ya!"
+            )}
         </span>
     `;
 
-    feedback.classList.remove("hidden");
+    feedback.classList.remove(
+        "hidden"
+    );
 
-    const nextButton = document.getElementById("btn-next-question");
+    const nextButton =
+        document.getElementById(
+            "btn-next-question"
+        );
 
     if (nextButton) {
-        nextButton.classList.remove("hidden");
+        nextButton.classList.remove(
+            "hidden"
+        );
     }
 }
 
 function escapeHtml(value) {
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 }
 
 function escapeAttribute(value) {
-    return String(value).replaceAll('"', "&quot;");
+    return String(value)
+        .replaceAll(
+            '"',
+            "&quot;"
+        );
 }
