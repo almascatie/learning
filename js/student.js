@@ -3,6 +3,7 @@ import { db, saveSession, deleteSession } from "./storage.js";
 import { openActivity } from "./activity.js";
 import { openQuizPackages } from "./quiz/quiz.js";
 import { openStemPackages } from "./stem/stem.js";
+import { openTimedPackages } from "./timed/timed.js";
 
 const state = {
     selectedStudent: null,
