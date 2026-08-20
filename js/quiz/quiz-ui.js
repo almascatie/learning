@@ -1,33 +1,22 @@
 export function renderQuizContainer(state, callbacks) {
     const app = document.getElementById("app");
-    if (!app) return;
 
-    let quizView = document.getElementById("view-quiz");
-
-    if (!quizView) {
-        quizView = document.createElement("section");
-        quizView.id = "view-quiz";
-        quizView.className = "view hidden";
-        app.appendChild(quizView);
-    }
-
-    quizView.innerHTML = `
-        <div class="quiz-container" style="max-width:600px;margin:0 auto;padding:24px 16px;">
-            <header class="quiz-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <button id="btn-quit-quiz" class="back-button" type="button">← Keluar</button>
-                <div class="quiz-progress-info">
-                    <span id="quiz-counter" style="font-weight:700;color:var(--muted);"></span>
+    app.innerHTML = `
+        <section id="view-quiz" class="view active">
+            <div class="quiz-container" style="max-width:600px;margin:0 auto;padding:24px 16px;">
+                <header class="quiz-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <button id="btn-quit-quiz" class="back-button" type="button">← Keluar</button>
+                    <div class="quiz-progress-info">
+                        <span id="quiz-counter" style="font-weight:700;color:var(--muted);"></span>
+                    </div>
+                </header>
+                <div class="progress-bar-container" style="background:var(--border);height:10px;border-radius:5px;overflow:hidden;margin-bottom:24px;">
+                    <div id="quiz-progress-fill" style="background:var(--blue);width:0%;height:100%;transition:width .3s ease;"></div>
                 </div>
-            </header>
-            <div class="progress-bar-container" style="background:var(--border);height:10px;border-radius:5px;overflow:hidden;margin-bottom:24px;">
-                <div id="quiz-progress-fill" style="background:var(--blue);width:0%;height:100%;transition:width .3s ease;"></div>
+                <div id="quiz-content"></div>
             </div>
-            <div id="quiz-content"></div>
-        </div>
+        </section>
     `;
-
-    quizView.classList.remove("hidden");
-    quizView.classList.add("active");
 
     document.getElementById("btn-quit-quiz").addEventListener("click", callbacks.onQuit);
     renderQuestion(state, callbacks);
@@ -41,8 +30,6 @@ export function renderQuestion(state, callbacks) {
     const number = state.currentIndex + 1;
     const percent = (number / total) * 100;
     const content = document.getElementById("quiz-content");
-
-    if (!content) return;
 
     document.getElementById("quiz-counter").textContent = `Soal ${number} / ${total}`;
     document.getElementById("quiz-progress-fill").style.width = `${percent}%`;
@@ -63,7 +50,9 @@ export function renderQuestion(state, callbacks) {
             <h2 style="font-size:20px;text-align:center;margin:0 0 20px;">
                 ${escapeHtml(questionObj.question || "")}
             </h2>
-            <div id="quiz-options">${renderOptions(questionObj)}</div>
+            <div id="quiz-options">
+                ${renderOptions(questionObj)}
+            </div>
             <div id="quiz-feedback" class="hidden"></div>
             <button id="btn-next-question" class="primary-button hidden" type="button" style="width:100%;margin-top:16px;">
                 ${number === total ? "Selesai" : "Soal Berikutnya →"}
@@ -111,7 +100,6 @@ export function showAnswerFeedback(questionObj, optionIndex, isCorrect) {
     });
 
     const feedback = document.getElementById("quiz-feedback");
-    if (!feedback) return;
 
     feedback.className = `message ${isCorrect ? "success" : "error"}`;
     feedback.style.cssText = `
@@ -131,9 +119,7 @@ export function showAnswerFeedback(questionObj, optionIndex, isCorrect) {
     `;
 
     feedback.classList.remove("hidden");
-
-    const nextButton = document.getElementById("btn-next-question");
-    if (nextButton) nextButton.classList.remove("hidden");
+    document.getElementById("btn-next-question").classList.remove("hidden");
 }
 
 function escapeHtml(value) {
