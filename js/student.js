@@ -106,6 +106,18 @@ function bindEvents() {
                 return;
             }
 
+            if (activity === "timed") {
+    const grade = state.selectedStudent?.grade;
+
+    if (!grade) {
+        console.error("Grade siswa tidak ditemukan.");
+        return;
+    }
+
+    openTimedPackages(grade);
+    return;
+}
+
             console.log("Activity selected:", activity);
         });
     });
