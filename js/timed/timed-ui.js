@@ -1,58 +1,3 @@
-export function renderTimedContainer(
-    title = "Tantangan Waktu"
-) {
-    const app = document.getElementById("app");
-
-    if (!app) {
-        console.error("Element #app tidak ditemukan.");
-        return;
-    }
-
-    app.innerHTML = `
-        <section id="view-timed" class="view active">
-
-            <div
-                class="quiz-container"
-                style="
-                    max-width:600px;
-                    margin:0 auto;
-                    padding:24px 16px;
-                "
-            >
-
-                <header
-                    class="quiz-header"
-                    style="
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        margin-bottom:24px;
-                    "
-                >
-
-                    <button
-                        id="btn-quit-timed"
-                        class="back-button"
-                        type="button"
-                    >
-                        ← Keluar
-                    </button>
-
-                    <strong>
-                        ${escapeHtml(title)}
-                    </strong>
-
-                </header>
-
-                <div id="timed-content"></div>
-
-            </div>
-
-        </section>
-    `;
-}
-
-
 export function renderTimedPackages(packages) {
     const app = document.getElementById("app");
 
@@ -61,53 +6,64 @@ export function renderTimedPackages(packages) {
         return;
     }
 
-    app.innerHTML = `
-        <section
-            id="view-timed-packages"
-            class="view active"
-        >
+    // Sembunyikan semua view
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.add("hidden");
+        view.classList.remove("active");
+    });
 
-            <div class="student-home-container">
+    // Hapus view lama
+    const oldTimedView =
+        document.getElementById("view-timed-packages");
 
-                <header class="home-header">
+    if (oldTimedView) {
+        oldTimedView.remove();
+    }
 
-                    <button
-                        id="btn-back-timed-home"
-                        class="back-button"
-                        type="button"
-                    >
-                        ← Kembali ke Beranda
-                    </button>
+    // Buat view baru
+    const timedView =
+        document.createElement("section");
 
-                    <h2 style="margin-top:12px;">
-                        Pilih Tantangan Waktu ⏱️
-                    </h2>
+    timedView.id = "view-timed-packages";
+    timedView.className = "view active";
 
-                    <p
-                        style="
-                            color:var(--muted);
-                            margin:0;
-                        "
-                    >
-                        Pilih tantangan untuk mulai.
-                    </p>
+    timedView.innerHTML = `
+        <div class="student-home-container">
 
-                </header>
+            <header class="home-header">
 
-                <div
-                    id="timed-package-list"
-                    class="activity-menu"
-                    style="margin-top:20px;"
-                ></div>
+                <button
+                    id="btn-back-timed-home"
+                    class="back-button"
+                    type="button"
+                >
+                    ← Kembali ke Beranda
+                </button>
 
-            </div>
+                <h2 style="margin-top:12px;">
+                    Pilih Tantangan Waktu ⏱️
+                </h2>
 
-        </section>
+                <p style="color:var(--muted);margin:0;">
+                    Pilih tantangan untuk mulai.
+                </p>
+
+            </header>
+
+            <div
+                id="timed-package-list"
+                class="activity-menu"
+                style="margin-top:20px;"
+            ></div>
+
+        </div>
     `;
 
-    const list = document.getElementById(
-        "timed-package-list"
-    );
+    // Tambahkan tanpa menghapus view-home
+    app.appendChild(timedView);
+
+    const list =
+        document.getElementById("timed-package-list");
 
     if (!list) {
         console.error(
@@ -116,7 +72,7 @@ export function renderTimedPackages(packages) {
         return;
     }
 
-    if (!packages.length) {
+    if (!packages || !packages.length) {
         list.innerHTML = `
             <div class="loading">
                 Belum ada tantangan waktu.
@@ -126,7 +82,8 @@ export function renderTimedPackages(packages) {
     }
 
     packages.forEach(item => {
-        const button = document.createElement("button");
+        const button =
+            document.createElement("button");
 
         button.type = "button";
         button.className = "activity-card timed";
@@ -154,13 +111,87 @@ export function renderTimedPackages(packages) {
             </span>
         `;
 
-        button.addEventListener(
-            "click",
-            () => item.onOpen?.()
-        );
+        button.addEventListener("click", () => {
+            item.onOpen?.();
+        });
 
         list.appendChild(button);
     });
+}
+
+
+export function renderTimedContainer(
+    title = "Tantangan Waktu"
+) {
+    const app = document.getElementById("app");
+
+    if (!app) {
+        console.error("Element #app tidak ditemukan.");
+        return;
+    }
+
+    // Sembunyikan semua view
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.add("hidden");
+        view.classList.remove("active");
+    });
+
+    // Hapus view lama
+    const oldTimedView =
+        document.getElementById("view-timed");
+
+    if (oldTimedView) {
+        oldTimedView.remove();
+    }
+
+    // Buat view baru
+    const timedView =
+        document.createElement("section");
+
+    timedView.id = "view-timed";
+    timedView.className = "view active";
+
+    timedView.innerHTML = `
+        <div
+            class="quiz-container"
+            style="
+                max-width:600px;
+                margin:0 auto;
+                padding:24px 16px;
+            "
+        >
+
+            <header
+                class="quiz-header"
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    margin-bottom:24px;
+                "
+            >
+
+                <button
+                    id="btn-quit-timed"
+                    class="back-button"
+                    type="button"
+                >
+                    ← Keluar
+                </button>
+
+                <strong>
+                    ${escapeHtml(title)}
+                </strong>
+
+            </header>
+
+            <div id="timed-content"></div>
+
+        </div>
+    `;
+
+    // Tambahkan tanpa menghapus view-home
+    app.appendChild(timedView);
 }
 
 
